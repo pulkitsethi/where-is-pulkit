@@ -87,7 +87,7 @@
 		map.scrollWheelZoom = false;
 
 		var pointA = new L.LatLng(38.788345, -77.163849);
-		var pointB = new L.LatLng(37.788345, -76.163849);
+		var pointB = new L.LatLng(38.688345, -77.263849);
 		var pointList = [pointA, pointB];
 
 		var firstpolyline = new L.Polyline(pointList, {
@@ -99,6 +99,8 @@
 		});
 
 		firstpolyline.addTo(map);
+
+		map.fitBounds(firstpolyline.getBounds());
     </script>
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="/javascripts/bootstrap.min.js"></script>

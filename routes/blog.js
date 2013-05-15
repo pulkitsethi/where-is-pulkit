@@ -47,9 +47,9 @@ exports.list = function(req, res){
 	var format = req.query.format;
 
 	if(format == 'json'){
-		res.json('blog', {title: 'Blog', posts: posts });
+		res.json('blog', {title: 'Where Is Pulkit', posts: posts });
 	} else {
-		res.render('blog', {title: 'Blog', posts: posts });
+		res.render('blog', {title: 'Where Is Pulkit', posts: posts });
 	}
 
 };

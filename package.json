@@ -1,13 +1,17 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "name": "where-is-pulkit",
+  "version": "0.0.1-1",
   "private": true,
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
     "express": "3.2.4",
-    "handlebars": "*",
-    "consolidate": "*"
+    "handlebars": "1.0.11",
+    "consolidate": "0.9.1"
+  },
+  "subdomain": "whereispulkit",
+  "engines": {
+    "node": "0.8.x"
   }
 }
