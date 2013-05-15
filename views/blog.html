@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.css' rel='stylesheet' />
+    <!--[if lte IE 8]>
+      <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.ie.css' rel='stylesheet' >
+    <![endif]-->
+
+    <style>
+
+    	#status-bar {
+    		/*margin-right: 110px;*/
+    	}
+
+    	#post-list {
+    		list-style: none outside none;
+    	}
+
+    	#post-list .well {
+    		padding-top: 5px;
+    		padding-bottom: 5px;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+	              <li><a href="/"><i class="icon-home"></i> Home</a></li>
+	              <li class="active"><a href="/blog"><i class="icon-bookmark"></i> Blog</a></li>
+	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
+	              <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
+	              <li><a href="/about">About Me</a></li>
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+
+
+    	<div id="post-container">
+    		<div class="row-fluid ">
+    			<div class="span7 offset1">
+		    		<div id="post-view">
+					    <ul id="post-list">
+					    {{#each posts}}
+					      <li class="well">
+					        <h3>{{title}}</h3>
+					        <small class="muted">{{date}}</small>
+					        <p class="lead">{{{body}}</p>
+					      </li>
+					    {{/each}}
+					    </ul>
+					</div>
+				</div>
+
+	   			<!-- Status -->
+	   			<div class="span3 hidden-phone">
+					<div id="status-bar">
+						<div class="well">
+						  <h4>Status</h4>
+						  <div class="lead">
+						    Driving
+						  </div>
+						  <h4>Current City</h4>
+						  <div class="lead">
+						    Washington, DC
+						  </div>
+						  <h4>Weather</h4>
+						  <div class="lead">
+						    74 C
+						  </div>
+						  <h4>Mood</h4>
+						  <div class="lead">
+						    Happy
+						  </div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+    	</div>
+    </div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+  </body>
+</html>

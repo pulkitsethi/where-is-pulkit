@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.css' rel='stylesheet' />
+    <!--[if lte IE 8]>
+      <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.ie.css' rel='stylesheet' >
+    <![endif]-->
+
+    <style>
+    	#status-bar .well {
+    		border-color: #D3D3D3;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+	              <li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>
+	              <li><a href="/blog"><i class="icon-bookmark"></i> Blog</a></li>
+	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
+	              <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
+	              <li><a href="/about">About Me</a></li>
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+		<!-- Status -->
+		<div id="status-bar">
+		<div class="well">
+		  <h4>Status</h4>
+		  <div class="lead">
+		    Driving
+		  </div>
+		  <h4>Current City</h4>
+		  <div class="lead">
+		    Washington, DC
+		  </div>
+		  <h4>Weather</h4>
+		  <div class="lead">
+		    74 C
+		  </div>
+		  <h4>Mood</h4>
+		  <div class="lead">
+		    Happy
+		  </div>
+		</div>
+		</div>
+
+    	<div id="container" class="wrap">
+
+		<!--Map-->
+		<div id="map-view">
+		  <div id="map-canvas" class="leaflet-container leaflet-fade-anim" style="position: relative;"></div>
+		</div>
+
+		<div id="stream-container">
+		  <div id="stream-view">
+		    <ul id="stream-list">
+		      <li class="card">
+		        TEST ITEM
+		      </li>
+		    </ul>
+		  </div>
+		</div>
+
+      </div>
+    </div>
+
+    <!--Javascript-->
+    <script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.js'></script>
+    <script>
+		
+		var map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw').setView([38.788345,-77.163849], 8);
+		map.touchZoom = false;
+		map.scrollWheelZoom = false;
+
+		var pointA = new L.LatLng(38.788345, -77.163849);
+		var pointB = new L.LatLng(37.788345, -76.163849);
+		var pointList = [pointA, pointB];
+
+		var firstpolyline = new L.Polyline(pointList, {
+			color: 'red',
+			weight: 3,
+			opacity: 0.5,
+			smoothFactor: 1
+
+		});
+
+		firstpolyline.addTo(map);
+    </script>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+  </body>
+</html>
