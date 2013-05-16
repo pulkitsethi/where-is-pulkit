@@ -83,10 +83,16 @@
     <script src="/javascripts/bootstrap.min.js"></script>
     <script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.js'></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/raphael-min.js"></script>
+    <script src="/javascripts/rlayer.js"></script>
     <script>
 		
 		//Setup map
-		var map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw').setView([38.788345,-77.163849], 8);
+		var map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw').setView([38.60313492038697,-97.94665625],4);
+
+		//.setView([38.788345,-77.163849], 8);
+		//[38.60313492038697,-97.94665625]
+
 		map.touchZoom = false;
 		map.scrollWheelZoom = false;
 
@@ -104,6 +110,44 @@
 
 		firstpolyline.addTo(map);
 
+		var circleMarker = L.circleMarker([38.788345, -77.163849], {
+		    color: 'red',
+		    fillColor: '#f03',
+		    fillOpacity: 0.3,
+		    radius: 1
+		}).addTo(map);
+
+		setInterval(function() {
+			/*
+			var r = circleMarker.options.radius;
+
+			if(r <= 30){
+				//circleMarker.options.radius = r - 2;
+				circleMarker.setRadius(r+.5);
+			} else {
+				//circleMarker.options.radius = 30;
+				circleMarker.setRadius(1);
+			}
+
+			circleMarker.redraw();
+			console.log('Redraw circleMarker r=' + r);
+			
+			*/
+			var p = new R.Pulse(
+				pointA, 
+				6,
+				{'stroke': '#2478ad', 'fill': '#30a3ec'}, 
+				{'stroke': '#30a3ec', 'stroke-width': 3}
+			);
+
+			map.addLayer(p);
+
+		}, 3000);
+
+		//RLayer example
+
+
+
 		//Socket
 		var socket = io.connect(window.location.pathname);
 		  
@@ -117,7 +161,7 @@
 		}
 
 		socket.on('position-update', function (data) {
-		    console.log(data);
+		    //console.log(data);
 
 		    updatePosition(data.lat, data.long);
 
