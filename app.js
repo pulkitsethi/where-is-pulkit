@@ -38,6 +38,27 @@ app.get('/blog?:format', blog.list);
 app.get('/users', user.list);
 app.get('/photos', photo.list)
 
-http.createServer(app).listen(app.get('port'), function(){
+var httpServer = http.createServer(app);
+
+httpServer.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
+});
+
+//Socket.IO
+io = require('socket.io').listen(httpServer);		//Starting socket.io app
+
+io.sockets.on('connection', function (socket) {
+  //Initializing to Springfield Mixing bowl
+  newLat = 38.788345;
+  newLong = -77.163849;
+
+  //Mock position data emited every 3 seconds
+  setInterval(function() {
+    newLat = newLat + .0001;
+    newLong = newLong + .0001;
+    
+    socket.emit('position-update', { lat: newLat, long: newLong });
+  }, 3000);
+  
+
 });

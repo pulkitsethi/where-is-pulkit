@@ -6,6 +6,7 @@
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
     <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.css' rel='stylesheet' />
+    <link href="/stylesheets/plusgallery.css" rel="stylesheet" media="screen">
 
     <!--[if lte IE 8]>
       <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.ie.css' rel='stylesheet' >
@@ -55,7 +56,17 @@
     		<div class="row-fluid ">
     			<div class="span7 offset1">
 		    		<div id="post-view">
-		    			<div id="picasa-gallery" class="well"></div>
+		    			<!--
+		    			<div id="picasa-gallery" class="well">
+		    			</div>
+		    			-->
+					</div>
+
+      				<div id="plusgallery" 
+      					data-type="google" 
+      					data-userid="108608884497707175154" 
+      					data-credit="false"
+      					data-limit="100">
 					</div>
 				</div>
 
@@ -97,8 +108,9 @@
     
     <script src="/javascripts/bootstrap.min.js"></script>
 
+    <!-- PICASA GALLLERY -->
     <script>
-    https://picasaweb.google.com/108608884497707175154/20111211?authuser=0&authkey=&feat=directlink
+    //https://picasaweb.google.com/108608884497707175154/20111211?authuser=0&authkey=&feat=directlink
     	$("#picasa-gallery").picasaGallery("108608884497707175154", "5684956124368949329" , "Gv1sRgCMnTwdyLzeaHLg", function(images){
 	    	var picasaAlbum = "<ul id='gallery'>\n";
 	        
@@ -121,10 +133,15 @@
 			    panel_height: '400'
 			});
     	});
+    </script>
 
+    <!-- PLUS GALLERY -->
+    <script src="/javascripts/plusgallery.js"></script>
 
-
-    	
+    <script>
+      	$(function(){
+          $('#plusgallery').plusGallery();
+        });
     </script>
 
   </body>

@@ -79,9 +79,13 @@
     </div>
 
     <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
     <script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.js'></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
 		
+		//Setup map
 		var map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw').setView([38.788345,-77.163849], 8);
 		map.touchZoom = false;
 		map.scrollWheelZoom = false;
@@ -100,10 +104,30 @@
 
 		firstpolyline.addTo(map);
 
-		map.fitBounds(firstpolyline.getBounds());
+		//Socket
+		var socket = io.connect('http://127.0.0.1:3000');
+		  
+		function updatePosition(lat, long) {
+			var position = new L.LatLng(lat, long);
+
+		    //Add new position
+		    //var path = firstpolyline.getPath();
+		    //path.push(position);
+		    firstpolyline.addLatLng(position);
+		}
+
+		socket.on('position-update', function (data) {
+		    console.log(data);
+
+		    updatePosition(data.lat, data.long);
+
+		    //map.fitBounds(firstpolyline.getBounds());
+		});
+
+
+
     </script>
-    <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="/javascripts/bootstrap.min.js"></script>
+
 
   </body>
 </html>
