@@ -7,6 +7,7 @@ var express = require('express')
   , site = require('./routes/site')
   , blog = require('./routes/blog')
   , user = require('./routes/user')
+  ,	photo = require('./routes/photo')
   , http = require('http')
   , path = require('path')
   , consolidate = require('consolidate');
@@ -35,6 +36,7 @@ if ('development' == app.get('env')) {
 app.get('/', site.index);
 app.get('/blog?:format', blog.list);
 app.get('/users', user.list);
+app.get('/photos', photo.list)
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
