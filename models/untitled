@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+
+        <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+    </head>
+
+    <body>
+        <div class="container">
+
+            <a href="/auth/google">Sign In with Google</a>
+
+          <form class="form-signin" action="/register" method="post">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <input type="text" class="input-block-level" placeholder="First name" name="first">
+            <input type="text" class="input-block-level" placeholder="Last name" name="last">
+            <input type="text" class="input-block-level" placeholder="Email address" name="username">
+            <input type="password" class="input-block-level" placeholder="Password" name="password">
+
+            <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+          </form>
+
+        </div>
+    </body>
+</html>

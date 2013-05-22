@@ -30,6 +30,18 @@
 	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
 	              <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
 	              <li><a href="/about">About Me</a></li>
+
+	              <li class="divider-vertical"></li>
+
+	              <li>
+					<i class="icon-user"></i>
+	              {{#if user}}
+    				{{user.name.first}}
+    			  {{else}}
+    			    <a href="/login">Login</a>
+      			  {{/if}}
+      			  </li>
+
 	            </ul>
 	          </div>
 	        </div>
