@@ -3,10 +3,10 @@ var mongoose = require('mongoose'),
     passportLocalMongoose = require('passport-local-mongoose');
 
 var AccountSchema = new Schema({
-    name: String,
+    firstName: String,
+    lastName: String,
     email: String,
-    google: {},
-    facebook: {},
+    openId: String,
     provider: { type: String, default: 'local'},
     approved: { type: Boolean, default: false },
     datecreated: {type: Date, default: Date.now}
@@ -19,4 +19,3 @@ AccountSchema.plugin(passportLocalMongoose);
 }*/
 
 module.exports = mongoose.model('Account', AccountSchema);
-

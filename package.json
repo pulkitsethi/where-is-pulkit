@@ -1,6 +1,6 @@
 {
   "name": "where-is-pulkit",
-  "version": "0.0.1-5",
+  "version": "0.0.1-30",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -18,6 +18,10 @@
     "connect": "2.7.9"
   },
   "subdomain": "whereispulkit",
+  "domains": [
+    "whereispulkit.com",
+    "www.whereispulkit.com"
+  ],
   "engines": {
     "node": "0.8.x"
   }

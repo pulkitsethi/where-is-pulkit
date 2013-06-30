@@ -35,11 +35,10 @@
 	          <div class="navbar-inner">
 	            <span class="brand pull-left" href="#"><strong>{{title}}</strong></span>
 	            <ul class="nav pull-right">
-	              <li><a href="/"><i class="icon-home"></i> Home</a></li>
+				  <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
 	              <li class="active"><a href="/blog"><i class="icon-bookmark"></i> Blog</a></li>
 	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
-	              <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
-	              <li><a href="/about">About Me</a></li>
+	              <li><a href="/about"></a></li>
 	            </ul>
 	          </div>
 	        </div>
@@ -59,6 +58,10 @@
 					        <small class="muted">{{date}}</small>
 					        <p class="lead">{{{body}}</p>
 					      </li>
+					    {{else}}
+					      <li class="well">
+					      	<h2>No blogkuis have been created yet :)</h2>
+					      </li>
 					    {{/each}}
 					    </ul>
 					</div>
@@ -66,6 +69,8 @@
 
 	   			<!-- Status -->
 	   			<div class="span3 hidden-phone">
+					
+					<!--
 					<div id="status-bar">
 						<div class="well">
 						  <h4>Status</h4>
@@ -73,19 +78,13 @@
 						    Driving
 						  </div>
 						  <h4>Current City</h4>
-						  <div class="lead">
+						  <div id="current-city" class="lead">
 						    Washington, DC
-						  </div>
-						  <h4>Weather</h4>
-						  <div class="lead">
-						    74 C
-						  </div>
-						  <h4>Mood</h4>
-						  <div class="lead">
-						    Happy
 						  </div>
 						</div>
 					</div>
+
+					-->
 				</div>
 			</div>
 
@@ -96,5 +95,14 @@
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="/javascripts/bootstrap.min.js"></script>
 
+    <script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-41996553-1', 'whereispulkit.com');
+	  ga('send', 'pageview');
+	</script>
   </body>
 </html>

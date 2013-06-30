@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.css' rel='stylesheet' />
+    <!--[if lte IE 8]>
+      <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.ie.css' rel='stylesheet' >
+    <![endif]-->
+
+    <style>
+    	#status-bar .well {
+    		border-color: #D3D3D3;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+	              <!--<li class="active"><a href="/"><i class="icon-home"></i> Home</a></li>-->
+	     	      <!--
+	     	      <li class="active"><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
+	     	      
+	              <li><a href="/blog"><i class="icon-bookmark"></i> Blog</a></li>
+
+	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
+	              	          	-->
+	              <li><a href="/about"></a></li>
+
+	              <!--
+	              <li class="divider-vertical"></li>
+
+	              <li>
+
+	              {{#if user}}
+    				<a><i class="icon-user"></i>{{user.firstName}}</a>
+    			  {{else}}
+    			    <a href="/login">Login</a>
+      			  {{/if}}
+      			  </li>
+      				-->
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+		<!-- Status -->
+		<div id="status-bar">
+			<div class="well">
+			  <h4>Current City</h4>
+			  <div id="current-city" class="lead">
+			    
+			  </div>
+			</div>
+		</div>
+
+    	<div id="container" class="wrap">
+
+		<!--Map-->
+		<div id="map-view">
+		  <div id="map-canvas" class="leaflet-container leaflet-fade-anim" style="position: relative;"></div>
+		</div>
+
+		<!--
+		<div id="stream-container">
+		  <div id="stream-view">
+		    <ul id="stream-list">
+		      <li class="card">
+		        TEST ITEM
+		      </li>
+		    </ul>
+		  </div>
+		</div>
+		-->
+
+      </div>
+    </div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.js'></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/raphael-min.js"></script>
+    <script src="/javascripts/rlayer.js"></script>
+
+    <script src="/javascripts/jquery.galleryview-3.0-dev.js"></script>
+    <script>
+		
+
+		//Variables
+		var zoomLevel = 4;
+		var global_position = {};
+		var previous_city = null;
+		var isStatusInitialized = false;
+
+		//Setup map
+		var map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw').setView([38.60313492038697,-97.94665625], zoomLevel);
+
+		map.touchZoom = false;
+		map.scrollWheelZoom = false;
+
+		var url = window.location.origin + '/api/get/location';
+
+		//DRAWING LOCATION LINE
+
+		var path = null;
+		var positionMarker = null;
+		var circleMarker = null;
+
+		//get location data
+		$.ajax({
+			type: "GET",
+			url: url,
+			dataType: 'json',
+			success: drawPolylineCallback
+		});
+
+		function drawPolylineCallback(data, cb){
+			//console.log('Drawpolyline callback');
+			var pointList = [];
+			var coords = data.locations.coordinates;
+					
+			for(var i = 0; i < coords.length; i++){
+				pointList.push(new L.LatLng(coords[i][1], coords[i][0]));
+
+				//Debugging
+				//L.circleMarker(new L.LatLng(coords[i][1], coords[i][0])).addTo(map);
+			}
+
+			//Creating path polyline
+			path = new L.Polyline(pointList, {
+				color: //'black',
+						'#FF5300',
+						//'#0D58A6',
+						//'#FFA100',
+						//'#3063A5', 
+						//'#DC143C',
+				weight: 2.6, //2.3,
+				opacity: 0.9,
+				smoothFactor: 1
+				,dashArray: [10,5]
+			});
+
+			//Update view of map to zoom in a much as possible with keep the ma
+			map.fitBounds(path.getBounds());
+
+			path.addTo(map);
+
+			//Creating position marker at last coordinate
+			position = pointList[pointList.length-1];
+
+			/**
+			var positionIcon = L.icon({
+			    iconUrl: '/images/rsz_position-orange3-64-icon.png'
+			    , iconSize: [16, 16]
+			});
+			**/
+
+			var positionIcon = L.icon({
+			    iconUrl: '/images/driving-car-icon-2.png'
+			    , iconSize: [68, 78]
+			    , iconAnchor:   [35, 64]
+			});
+
+
+			positionMarker = L.marker(position, {
+				icon: positionIcon
+			}).addTo(map);
+
+			/**
+			circleMarker = L.circleMarker(position, {
+				radius: 11,
+				color: //'#FF7800'
+				'#FF5300'
+			}).addTo(map);
+			**/
+
+			//Saving position in global variable for other functions (updating city)
+			global_position.lat = position.lat;
+		    global_position.long = position.lng;
+		    //console.log('Global Position: ' + global_position);
+
+		    updateStatus(global_position.lat, global_position.long);
+
+		    //Photo markers
+		    photoMarkers();
+
+		}
+
+
+		function photoMarkers(){
+
+    	}
+
+
+		//Socket
+		var socket = io.connect(window.location.origin);
+		  
+		function updatePosition(lat, long) {
+			var position = new L.LatLng(lat, long);
+
+		    //Add new position
+		    path.addLatLng(position);
+
+			positionMarker.setLatLng(position);
+			//circleMarker.setLatLng(position);
+		}
+
+		function updateStatus(lat, long){
+			console.log('Locating city...');
+
+			//Variables
+			var url = 'http://api.tiles.mapbox.com/v3/pulkitsethi.map-6rv4q6kw/geocode/' + long + ',' + lat + '.json';
+
+			$.get(
+			    url,
+			    function(data) {
+					var city = null;	//City returned from API call
+
+			       $.each(data.results[0], function (index, item){
+			       		if(item.type == 'CDP' || item.type == 'city'){
+			       			console.log('City: ' + item.name);
+			       			city = item.name;
+
+			       		}
+			       });
+
+			       if(city != previous_city){
+				       if(city){
+				       		$('#current-city').hide().text(city).fadeIn(1500);
+				       } else {
+				       		$('#current-city').hide().text('Unknown').fadeIn(1500);
+				       }
+			   		}
+
+			   		previous_city = city;
+			       
+			    }
+			);
+		}
+
+		
+		/**
+		//Listening to position updates
+		socket.on('position-update', function (data) {
+			//console.log(data);
+			console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
+
+		    //Cacheing last known position locally to be used by other functions
+		    global_position.lat = data.lat;
+		    global_position.long = data.long;
+
+		    if(!isStatusInitialized){
+		    	
+		    }
+
+		    //Updating marker
+		    updatePosition(data.lat, data.long);
+		});
+		**/
+		
+
+		
+		/** TURN BACK ON WHEN SOCKET.IO is working
+		//Update status ever 30 seconds based on last known position
+	  	setInterval(function() {
+	  		//console.log('Trying to update city: ' + global_position.lat + ', ' + global_position.long);
+
+	    	updateStatus(global_position.lat, global_position.long);
+	 	}, 30000);
+	  	**/
+
+    </script>
+
+    <script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-41996553-1', 'whereispulkit.com');
+	  ga('send', 'pageview');
+	</script>
+
+
+  </body>
+</html>

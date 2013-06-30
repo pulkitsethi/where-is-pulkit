@@ -8,9 +8,9 @@ var express = require('express')
   , path = require('path')
   , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
-  , passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy
-  , GoogleStrategy = require('passport-google').Strategy;
+  , passport = require('passport');
+  //, LocalStrategy = require('passport-local').Strategy
+  //, GoogleStrategy = require('passport-google').Strategy;
 
 var app = express();
 
@@ -37,77 +37,36 @@ app.configure(function(){
 });
 
 app.configure('development', function(){
+
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+
+  // Connect mongoose
+  mongoose.connect('mongodb://localhost/whereispulkit');
 });
 
 app.configure('production', function(){
   app.use(express.errorHandler()); 
+
+  // Connect mongoose
+  mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
 });
 
+/**
 // Configure passport
 var Account = require('./models/account');
 
-passport.use('local', new LocalStrategy(Account.authenticate()));
-
-passport.use('google', new GoogleStrategy({
-    returnURL: 'http://localhost:3000/auth/google/return',
-    realm: 'http://localhost:3000/'
-  },
-  function(identifier, profile, done) {
-    Account.findOne({ 'google.id': identifier }, function(err, user) {
-      if(!user){
-        // make a new google profile without key start with $
-        var new_profile = {}
-        new_profile.id = profile.id
-        new_profile.displayName = profile.displayName
-        new_profile.emails = profile.emails
-        user = new Account({
-            name: profile.displayName
-          , email: profile.emails[0].value
-          , username: profile.username
-          , provider: 'google'
-          , google: new_profile._json
-        })
-        user.save(function (err) {
-          if (err) console.log(err)
-          return done(err, user)
-        })
-      } else {
-        done(err, user);
-      }
-    });
-  }
-));
+passport.use(new LocalStrategy(Account.authenticate()));
 
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
-
-// Connect mongoose
-mongoose.connect('mongodb://localhost/whereispulkit');
-
-// Setup routes
-require('./routes')(app);
+**/
 
 var server = http.createServer(app);
 
+// Setup routes
+require('./routes')(app, server);
+
+//Start server
 server.listen(app.get('port'), function(){
   console.log("Express server listening on %s:%d in %s mode", '127.0.0.1', app.get('port'), app.settings.env);
-});
-
-//Socket.IO
-io = require('socket.io').listen(server);		//Starting socket.io app
-
-io.sockets.on('connection', function (socket) {
-  //Initializing to Springfield Mixing bowl
-  newLat = 38.788345;
-  newLong = -77.163849;
-
-  //Mock position data emited every 3 seconds
-  setInterval(function() {
-    newLat = newLat + .0001;
-    newLong = newLong + .0001;
-    
-    socket.emit('position-update', { lat: newLat, long: newLong });
-  }, 3000);
-  
 });
