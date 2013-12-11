@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+  	<link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+  	<!--[if lte IE 8]>
+    	<link href='http://api.tiles.mapbox.com/mapbox.js/v1.1.0/mapbox.ie.css' rel='stylesheet' />
+  	<![endif]-->
+
+    <style>
+    	#status-bar .well {
+    		border-color: #D3D3D3;
+    	}
+    </style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  </head>
+  <body>
+
+    <a id="foursquare-connect">Connect to FourSquare</a>
+
+    <div id="access-token-title"></div>
+    <div id="access-token"></div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script>
+      $(function() {
+        var config = {
+          apiKey: 'OGDQ2XQ0V40RC5FA2IXPG1DXX3ZBGP2UXNWXI4M4SV0HMIYW',
+          authUrl: 'https://foursquare.com/',
+          apiUrl: 'https://api.foursquare.com/'
+        };
+
+        /* Attempt to retrieve access token from URL. */
+        function doAuthRedirect() {
+          console.log('doAuthRedirect');
+
+          var redirect = window.location.href.replace(window.location.hash, '');
+          var url = config.authUrl + 'oauth2/authenticate?response_type=token&client_id=' + config.apiKey +
+                '&redirect_uri=' + encodeURIComponent(redirect) ;
+                //+ '&state=' + encodeURIComponent($.bbq.getState('req') || 'users/self');
+            window.location.href = url;
+        };
+
+        $('#foursquare-connect').click(function(){
+          console.log('foursquare-connect click');
+          doAuthRedirect();
+        });
+
+        
+        var hash_vars = location.hash.slice(1).split('=');
+
+
+        if(hash_vars[0] == 'access_token'){
+          var token = hash_vars[1];
+
+          $('#access-token-title').text('Access Token = ');
+          $('#access-token').text(token);
+        } else if(hash_vars[0] == 'errors') {
+          var error = hash_vars[1];
+
+          $('#access-token-title').text('Error = ');
+          $('#access-token').text(error);
+        }
+        
+        
+
+      });
+
+    </script>
+
+
+  </body>
+</html>

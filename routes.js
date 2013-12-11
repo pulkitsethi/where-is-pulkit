@@ -7,7 +7,7 @@ var passport = require('passport')
 module.exports = function(app, server) {
 
     //Set up socket
-    var io = require('socket.io').listen(server);
+    //var io = require('socket.io').listen(server);
 
     app.get('/', function(req, res){
         res.render('location', { title: 'Where Is Pulkit', user: req.user });
@@ -15,6 +15,11 @@ module.exports = function(app, server) {
 
     app.get('/location', function(req, res){
         res.render('location', { title: 'Where Is Pulkit', user: req.user });
+    });
+
+    //Social Test
+    app.get('/social', function(req, res){
+        res.render('social', { title: 'Where Is Pulkit', user: req.user });
     });
 
 
@@ -77,6 +82,8 @@ module.exports = function(app, server) {
     });
 
     //---------------------API
+
+    /**
     //Save location
     app.post('/api/save/location', function(req, res){
         //Variables
@@ -108,6 +115,7 @@ module.exports = function(app, server) {
 
         });
     });
+    **/
 
     //Get location
     app.get('/api/get/location', function(req, res){
@@ -116,69 +124,52 @@ module.exports = function(app, server) {
 
         //location = new Location({ latitude: req.body.latitude, longitude: req.body.longitude, timestamp: req.body.timestamp });
 
-        Location.find().sort({timestamp: 1}).exec(function(err, locations){
-            if(err){
-                console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
-            }
 
-            //Converting locations into geoJSON multistring
-            var coordinates = [];
-
-            for(key in locations){
-                coordinates.push([locations[key].longitude, locations[key].latitude]);
-            }
-
-            var geoJSONLocations =  { 
-                "type": "LineString",
-                "coordinates": coordinates
-            }
-
-            console.log(geoJSONLocations);
-
-            //Render JSON
-            res.jsonp({locations: geoJSONLocations});
-
-        });
-    });
-
-    //Get location
-    app.get('/api/get/location', function(req, res){
-        //Log input params
-        //console.log("Coordinates recieved: (" + req.body.latitude + "," + req.body.longitude + ")");
-
-        //location = new Location({ latitude: req.body.latitude, longitude: req.body.longitude, timestamp: req.body.timestamp });
+        //var bQuery = new Date().getTime();
 
         Location.find().sort({timestamp: 1}).exec(function(err, locations){
             if(err){
                 console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
             }
 
+            //var aQuery = new Date().getTime();
+            //var queryDiff = aQuery - bQuery;
+            //console.log('Time to query: ' + queryDiff);
+
             //Converting locations into geoJSON multistring
             var coordinates = [];
+
+            //var n1 = new Date().getTime();
 
             for(key in locations){
                 coordinates.push([locations[key].longitude, locations[key].latitude]);
             }
+
+            //var n2 = new Date().getTime();
 
             var geoJSONLocations =  { 
                 "type": "LineString",
                 "coordinates": coordinates
             }
 
-            console.log(geoJSONLocations);
+            //console.log(geoJSONLocations);
+
+            //var diff = n2 - n1;         
+            //console.log("Time to convert points: " + diff);
+            //var n3 = new Date().getTime();
 
             //Render JSON
             res.jsonp({locations: geoJSONLocations});
 
+            //var n4 = new Date().getTime();
+            //var diffRender = n4 - n3;
+            //console.log("Time to render json: " + diffRender);
         });
     });
 
     //Get location
     app.get('/api/get/currentLocation', function(req, res){
         //Log input params
-        //console.log("Coordinates recieved: (" + req.body.latitude + "," + req.body.longitude + ")");
-
-        //location = new Location({ latitude: req.body.latitude, longitude: req.body.longitude, timestamp: req.body.timestamp });
 
         Location.find().sort({timestamp: 1}).exec(function(err, locations){
             if(err){
@@ -197,7 +188,7 @@ module.exports = function(app, server) {
                 "coordinates": coordinates
             }
 
-            console.log(geoJSONLocations);
+            //console.log(geoJSONLocations);
 
             //Render JSON
             res.jsonp({locations: geoJSONLocations});

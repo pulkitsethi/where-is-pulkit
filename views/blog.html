@@ -33,11 +33,11 @@
 
 	        <div class="navbar navbar-fixed-top">
 	          <div class="navbar-inner">
-	            <span class="brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <span class="navbar-brand pull-left" href="#"><strong>{{title}}</strong></span>
 	            <ul class="nav pull-right">
-				  <li><a href="/location"><i class="icon-map-marker"></i> Location</a> </li>
-	              <li class="active"><a href="/blog"><i class="icon-bookmark"></i> Blog</a></li>
-	              <li><a href="/photos"><i class="icon-camera"></i> Photos</a></li>
+				  <li><a href="/location"><i class="glyphicon-map-marker"></i> Location</a> </li>
+	              <li class="active"><a href="/blog"><i class="glyphicon-bookmark"></i> Blog</a></li>
+	              <li><a href="/photos"><i class="glyphicon-camera"></i> Photos</a></li>
 	              <li><a href="/about"></a></li>
 	            </ul>
 	          </div>
@@ -48,8 +48,8 @@
 
 
     	<div id="post-container">
-    		<div class="row-fluid ">
-    			<div class="span7 offset1">
+    		<div class="row ">
+    			<div class="col-md-7 col-md-offset-1">
 		    		<div id="post-view">
 					    <ul id="post-list">
 					    {{#each posts}}
@@ -68,7 +68,7 @@
 				</div>
 
 	   			<!-- Status -->
-	   			<div class="span3 hidden-phone">
+	   			<div class="col-md-3 hidden-xs">
 					
 					<!--
 					<div id="status-bar">

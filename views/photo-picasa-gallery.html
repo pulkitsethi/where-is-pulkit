@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.css' rel='stylesheet' />
+    <link href="/stylesheets/plusgallery.css" rel="stylesheet" media="screen">
+
+    <!--[if lte IE 8]>
+      <link href='http://api.tiles.mapbox.com/mapbox.js/v1.0.2/mapbox.ie.css' rel='stylesheet' >
+    <![endif]-->
+
+    <link href="/stylesheets/jquery.galleryview-3.0-dev.css" rel="stylesheet" media="screen">
+
+    <style>
+
+    	#status-bar {
+    		/*margin-right: 110px;*/
+    	}
+
+    	#post-list {
+    		list-style: none outside none;
+    	}
+
+    	#post-list .well {
+    		padding-top: 5px;
+    		padding-bottom: 5px;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="navbar-brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+				  <li><a href="/location"><i class="glyphicon-map-marker"></i> Location</a> </li>
+	              <li><a href="/blog"><i class="glyphicon-bookmark"></i> Blog</a></li>
+	              <li class="active"><a href="/photos"><i class="glyphicon-camera"></i> Photos</a></li>
+	              <li><a href="/about"></a></li>
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+
+
+    	<div id="post-container">
+    		<div class="row">
+    			<div class="col-md-7 col-md-offset-1">
+		    		<div id="post-view">
+		    			<!--
+		    			<div id="picasa-gallery" class="well">
+		    			</div>
+		    			-->
+					</div>
+
+      				<div id="plusgallery" 
+      					data-type="google" 
+      					data-userid="108608884497707175154" 
+      					data-credit="false"
+      					data-limit="100">
+					</div>
+				</div>
+
+	   			<!-- Status -->
+	   			<div class="col-md-3 hidden-xs">
+
+            <!--
+					<div id="status-bar">
+						<div class="well">
+						  <h4>Status</h4>
+						  <div class="lead">
+						    Driving
+						  </div>
+						  <h4>Current City</h4>
+						  <div id="current-city" class="lead">
+						    Washington, DC
+						  </div>
+						</div>
+					</div>
+          -->
+
+				</div>
+			</div>
+
+    	</div>
+    </div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    
+    <script src="/javascripts/jquery.picasa.js"></script>
+    <script src="/javascripts/jquery.easing.1.3.js"></script>
+    <script src="/javascripts/jquery.galleryview-3.0-dev.js"></script>
+    <script src="/javascripts/jquery.timers-1.2.js"></script>
+    
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    <!-- PICASA GALLLERY -->
+    <script>
+    //https://picasaweb.google.com/108608884497707175154/20111211?authuser=0&authkey=&feat=directlink
+    	$("#picasa-gallery").picasaGallery("108608884497707175154", "5684956124368949329" , "Gv1sRgCMnTwdyLzeaHLg", function(images){
+	    	var picasaAlbum = "<ul id='gallery'>\n";
+	        
+	        $.each(images, function(i, element) {
+	          picasaAlbum += "  <li>\n";
+	          picasaAlbum += "      <img src='" + element.url + "?imgmax=1600' data-frame='" + element.thumbs[1].url + "' alt='image'/>\n";
+	          picasaAlbum += "  </li>\n";
+	        });
+	        
+	        picasaAlbum += "</ul>";
+	        
+	        $('#picasa-gallery').append(picasaAlbum);
+
+	        $('#gallery').galleryView({
+			     filmstrip_position: 'bottom',
+			     enable_overlays: true,
+			     overlay_position: 'top',
+			     panel_animation: 'crossfade',
+			     panel_width: '671',
+			     panel_height: '400'
+			     });
+    	});
+    </script>
+
+    <!-- PLUS GALLERY -->
+    <script src="/javascripts/plusgallery.js"></script>
+
+    <script>
+      	$(function(){
+          $('#plusgallery').plusGallery();
+        });
+    </script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-41996553-1', 'whereispulkit.com');
+      ga('send', 'pageview');
+    </script>
+
+  </body>
+</html>

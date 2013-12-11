@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+
+    <style>
+
+    	#status-bar {
+    		/*margin-right: 110px;*/
+    	}
+
+    	#post-list {
+    		list-style: none outside none;
+    	}
+
+    	#post-list .well {
+    		padding-top: 5px;
+    		padding-bottom: 5px;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="navbar-brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+	              <li><a href="/"><i class="glyphicon-home"></i> Home</a></li>
+	              <li class="active"><a href="/blog"><i class="glyphicon-bookmark"></i> Blog</a></li>
+	              <li><a href="/photos"><i class="glyphicon-camera"></i> Photos</a></li>
+	              <li><a href="/location"><i class="glyphicon-map-marker"></i> Location</a> </li>
+	              <li><a href="/about">About Me</a></li>
+	              <li>Admin
+	              	<ul>
+	              		<li>Location</li>
+	              	<ul>
+
+	              </li>
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+
+
+    	<div id="post-container">
+    		<div class="row">
+
+    			<div class="col-md-7 col-md-offset-1">
+
+    				<table class="table table-striped table-bordered table-hover table-condensed">
+					    <thead>
+					        <tr>
+					            <th>#</th>
+					            <th>Latitude</th>
+					            <th>Longitude</th>
+					            <th>Timestamp</th>
+					        </tr>
+					    </thead>
+					    <tbody>
+
+					    {{#each locations}}
+					      <tr>
+					      	<td>{{@index}}</td>
+					        <td>{{latitude}}</td>
+					        <td>{{longitude}}</td>
+					        <td>{{timestamp}}</td>
+					      </li>
+					    {{else}}
+	
+					    {{/each}}
+
+					    </tbody>
+    				</table>
+
+				</div>
+
+			</div>
+
+    	</div>
+    </div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+  </body>
+</html>

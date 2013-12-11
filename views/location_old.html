@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
+  	<link href='http://api.tiles.mapbox.com/mapbox.js/v1.1.0/mapbox.css' rel='stylesheet' />
+  	<!--[if lte IE 8]>
+    	<link href='http://api.tiles.mapbox.com/mapbox.js/v1.1.0/mapbox.ie.css' rel='stylesheet' />
+  	<![endif]-->
+
+    <style>
+    	#status-bar .well {
+    		border-color: #D3D3D3;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      
+		<div id="header">
+
+	        <div class="navbar navbar-fixed-top">
+	          <div class="navbar-inner">
+	            <span class="navbar-brand pull-left" href="#"><strong>{{title}}</strong></span>
+	            <ul class="nav pull-right">
+	              <!--<li class="active"><a href="/"><i class="glyphicon-home"></i> Home</a></li>-->
+	     	      <!--
+	     	      <li class="active"><a href="/location"><i class="glyphicon-map-marker"></i> Location</a> </li>
+	     	      
+	              <li><a href="/blog"><i class="glyphicon-bookmark"></i> Blog</a></li>
+
+	              <li><a href="/photos"><i class="glyphicon-camera"></i> Photos</a></li>
+	              	          	-->
+	              <li><a href="/about"></a></li>
+
+	              <!--
+	              <li class="divider-vertical"></li>
+
+	              <li>
+
+	              {{#if user}}
+    				<a><i class="glyphicon-user"></i>{{user.firstName}}</a>
+    			  {{else}}
+    			    <a href="/login">Login</a>
+      			  {{/if}}
+      			  </li>
+      				-->
+	            </ul>
+	          </div>
+	        </div>
+
+      	</div>
+
+		<!-- Status -->
+		<div id="status-bar">
+			<div class="well">
+			  <h4>Current City</h4>
+			  <div id="current-city" class="lead">
+			    
+			  </div>
+			</div>
+		</div>
+
+    	<div id="container" class="wrap">
+
+		<!--Map-->
+		<div id="map-view">
+		  <div id="map-canvas" class="leaflet-container leaflet-fade-anim" style="position: relative;"></div>
+		</div>
+
+		<!--
+		<div id="stream-container">
+		  <div id="stream-view">
+		    <ul id="stream-list">
+		      <li class="card">
+		        TEST ITEM
+		      </li>
+		    </ul>
+		  </div>
+		</div>
+		-->
+
+      </div>
+    </div>
+
+    <!--Javascript-->
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>-->
+
+    <script src="/javascripts/bootstrap.min.js"></script>
+    <script src='http://api.tiles.mapbox.com/mapbox.js/v1.1.0/mapbox.js'></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/raphael-min.js"></script>
+    <script src="/javascripts/rlayer.js"></script>
+
+    <script src="/javascripts/jquery.galleryview-3.0-dev.js"></script>
+
+	<script type="text/javascript" src="/javascripts/noty/jquery.noty.js"></script>
+
+	<script type="text/javascript" src="/javascripts/noty/layouts/top.js"></script>
+	<script type="text/javascript" src="/javascripts/noty/layouts/topLeft.js"></script>
+	<script type="text/javascript" src="/javascripts/noty/layouts/topRight.js"></script>
+	<script type="text/javascript" src="/javascripts/noty/layouts/topCenter.js"></script>
+	<script type="text/javascript" src="/javascripts/noty/themes/default.js"></script>
+
+    <script src="http://maximeh.github.io/leaflet.bouncemarker/bouncemarker.js"></script>
+    <script>
+	
+	var global_position = {};
+	var previous_city = null;
+
+    $(function() {
+		//Variables
+		var map_init_opts = {
+			  zoom: 4
+			, lat: 38.60313492038697
+			, lng: -97.94665625
+			, minZoom: 7
+			, maxZoom: 16
+		}
+
+
+		var isStatusInitialized = false;
+
+		//Geo data
+		var path = null;
+		var positionMarker = null;
+		var circleMarker = null;
+
+		//Setup map
+		map = L.mapbox.map('map-canvas', 'pulkitsethi.map-6rv4q6kw', {minZoom: map_init_opts.minZoom, maxZoom: map_init_opts.maxZoom});
+
+		//http://localhost:8888/v2/TileMillTest/{z}/{x}/{y}.png
+
+		//MAP Event - load
+		map.on('load', function(e) {
+			//Log
+			console.log('Map loaded');
+
+			map.touchZoom = false;
+			map.scrollWheelZoom = false;
+
+			map.minZoom = map_init_opts.minZoom;
+			map.maxZoom = map_init_opts.maxZoom;
+
+			//Get geo data and load into map
+			var url = window.location.origin + '/api/get/location';
+			
+			var ajaxNotification;
+
+			$.ajax({
+				type: "GET",
+				url: url,
+				dataType: 'json',
+				beforeSend: function(){
+					ajaxNotification = generateNotification('information', 'top', 'Locating Pulkit...');
+				},
+				success: function(data){
+					ajaxNotification.close();
+
+					ajaxNotification = generateNotification('success', 'top', 'Pulkit Found!!', '3000');
+
+					drawPathCallback(data);
+				},
+				complete: function (){
+					ajaxNotification.close();
+				},
+				error: function (){
+					generateNotification('error', 'topCenter', 'Can not find Pulkit :( Please try again shortly.');
+				}
+			});
+		});
+
+		//MAP Event - zoom end
+		map.on('zoomend', function(e) {
+			var zoom = map.getZoom();
+			var latlng = map.getCenter();
+
+			//Update URL
+	    	location.hash = 'z=' + zoom + '&' + 'latlng=' + latlng.lat + ',' + latlng.lng;
+		});
+
+		//Setting initial center
+		map.setView([map_init_opts.lat, map_init_opts.lng], map_init_opts.zoom);
+
+		//Socket
+		var socket = io.connect(window.location.origin);
+		  
+		//Listening to position updates
+		socket.on('position-update', function (data) {
+			//console.log(data);
+			console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
+
+		    //Cacheing last known position locally to be used by other functions
+		    global_position.lat = data.lat;
+		    global_position.long = data.long;
+
+		    if(!isStatusInitialized){
+		    	
+		    }
+
+		    //Updating marker
+		    updatePosition(data.lat, data.long);
+		});
+		
+		/** TURN BACK ON WHEN SOCKET.IO is working
+		//Update status ever 30 seconds based on last known position
+	  	setInterval(function() {
+	  		//console.log('Trying to update city: ' + global_position.lat + ', ' + global_position.long);
+
+	    	updateStatus(global_position.lat, global_position.long);
+	 	}, 30000);
+	  	**/
+	});
+		
+		function updatePosition(lat, long) {
+			var position = new L.LatLng(lat, long);
+
+		    //Add new position
+		    path.addLatLng(position);
+
+			positionMarker.setLatLng(position);
+			//circleMarker.setLatLng(position);
+		}		
+
+		function updateStatus(lat, long){
+			console.log('Locating city...');
+
+			//Variables
+			var url = 'http://api.tiles.mapbox.com/v3/pulkitsethi.map-6rv4q6kw/geocode/' + long + ',' + lat + '.json';
+
+			$.get(
+			    url,
+			    function(data) {
+					var city = null;	//City returned from API call
+
+			       $.each(data.results[0], function (index, item){
+			       		if(item.type == 'CDP' || item.type == 'city'){
+			       			console.log('City: ' + item.name);
+			       			city = item.name;
+
+			       		}
+			       });
+
+			       if(city != previous_city){
+				       if(city){
+				       		$('#current-city').hide().text(city).fadeIn(1500);
+				       } else {
+				       		$('#current-city').hide().text('Unknown').fadeIn(1500);
+				       }
+			   		}
+
+			   		previous_city = city;
+			       
+			    }
+			);
+		}
+
+		//Draws route path with icon at the end
+		function drawPathCallback(data, cb){
+
+			//console.log('Draw Path callback');
+
+			var pointList = [];
+			var coords = data.locations.coordinates;
+					
+			for(var i = 0; i < coords.length; i++){
+				pointList.push(new L.LatLng(coords[i][1], coords[i][0]));
+
+				//Debugging
+				//L.circleMarker(new L.LatLng(coords[i][1], coords[i][0])).addTo(map);
+			}
+
+			//Creating path polyline
+			var path = new L.Polyline(pointList, {
+				color:  '#FF5300'
+				,weight: 2.6
+				,opacity: 0.9
+				,smoothFactor: 1
+				,dashArray: [10,5]
+			});
+
+			//Zoom map to polyline
+			var pan = {
+				duration: 5.0
+				, animate: true
+				, easeLinearity: .5
+			}
+
+			fitBoundsOpts = {
+				reset : false
+				, pan : {
+					duration: 5.0
+					, animate: false
+					, easeLinearity: .1
+				}
+				, zoom : {
+					animate: false
+				}
+			}
+			//
+			map.fitBounds(path.getBounds(), fitBoundsOpts);
+			//map.setMaxBounds(path.getBounds().pad(.));
+			//
+
+			//Add polyline to map
+			path.addTo(map);
+
+			//Creating position marker at last coordinate
+			position = pointList[pointList.length-1];
+
+			var positionIcon = L.icon({
+			    iconUrl: '/images/driving-car-icon-2.png'
+			    , iconSize: [68, 78]
+			    , iconAnchor:   [35, 64]
+			});
+
+			var positionMarker = L.marker(position, {
+				icon: positionIcon
+				, bounceOnAdd: true
+			});
+
+			positionMarker.addTo(map);
+
+			//Saving position in global variable for other functions (updating city)
+			global_position.lat = position.lat;
+		    global_position.long = position.lng;
+		    //console.log('Global Position: ' + global_position);
+
+		    updateStatus(global_position.lat, global_position.long);
+
+		    //Photo markers
+		    photoMarkers();
+
+		}
+
+		function generateNotification(type, layout, text, timeout) {
+		   
+			   var n = noty({
+			   		text: text,
+			   		type: type,
+			      		dismissQueue: true,
+			   		layout: layout,
+			   		theme: 'defaultTheme',
+			   		timeout: timeout,
+			   		style: function() {
+						$(this).css({
+							top: 0,
+							left: '5%',
+							position: 'fixed',
+							width: '50%',
+							height: 'auto',
+							margin: 0,
+							padding: 0,
+							listStyleType: 'none',
+							zIndex: 9999999
+						});
+					}
+			   });
+
+			   console.log('html: '+n.options.id);
+
+			   return n;
+		}
+
+		function photoMarkers(){
+
+    	}
+
+    </script>
+
+    <script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-41996553-1', 'whereispulkit.com');
+	  ga('send', 'pageview');
+	</script>
+
+	<!-- UserVoice JavaScript SDK (only needed once on a page) -->
+	<script>(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/uHt6Y9zXUeO4bnFHZ6bg.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})()</script>
+
+	<!-- A tab to launch the Classic Widget -->
+	<script>
+	UserVoice = window.UserVoice || [];
+	UserVoice.push(['showTab', 'classic_widget', {
+	  mode: 'full',
+	  primary_color: '#cc6d00',
+	  link_color: '#007dbf',
+	  default_mode: 'support',
+	  forum_id: 213028,
+	  tab_label: 'Feedback & Support',
+	  tab_color: '#cc6d00',
+	  tab_position: 'bottom-right',
+	  tab_inverted: true
+	}]);
+	</script>
+
+  </body>
+</html>
