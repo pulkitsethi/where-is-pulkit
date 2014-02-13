@@ -201,6 +201,8 @@ module.exports = function(app, server) {
        
         //Variables
         var limit = 250;
+        var afterTimestamp = 1370034000;  //Epoch Seconds
+        var beforeTimestamp = 1379278800;   //Epoch Seconds
         var oauth_token = 'WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU';   //TODO: Get from user object or database
         
         //Get max number of checkins to return
@@ -213,6 +215,8 @@ module.exports = function(app, server) {
         
         var path = '/v2/users/56072394/checkins?v=20140212' 
             + '&limit=' + limit 
+            + '&afterTimestamp=' + afterTimestamp
+            + '&beforeTimestamp=' + beforeTimestamp
             + '&oauth_token=' + oauth_token;
         
         //Make request and return data
