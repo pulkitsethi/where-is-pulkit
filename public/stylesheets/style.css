@@ -168,6 +168,7 @@ body {
   float: left;
   width: 32px;
   margin-right: 5px;
+  padding-top: 5px;
 }
 
 .leaflet-popup-content > .venueName {
