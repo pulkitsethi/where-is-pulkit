@@ -208,7 +208,7 @@ module.exports = function(app, server) {
                 limit = req.query.limit;
         }
         
-        //Build GET Checking URL
+        //Build GET Checkin URL
         var host = 'https://api.foursquare.com';
         
         var path = '/v2/users/56072394/checkins?v=20140212' 
@@ -226,6 +226,30 @@ module.exports = function(app, server) {
 
     });
 
+    app.get('/api/get/photos', function(req, res){
+         //Variables
+        var flickr_api_url = 'https://secure.flickr.com/services/rest';
+        var method = 'flickr.photosets.getPhotos';
+        var api_key = '4dda8f378cd2863df1fa1fdb7a8cb9d4';           //TODO: Move to database
+        var default_api_key = '17e92ae42d3b19b4dd753e4a70090b8f';   //TODO: Move to database
+        var photoset_id = '72157634661787837';
+        var extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
+        var format = 'json';
+
+        //Build GET Checking URL
+        var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
+        
+        //Make request and return data
+        request.get(flickr_photos_url, function(error, response, body){
+            if (!error && response.statusCode == 200) {
+                res.send(JSON.parse(body));
+            } else {
+                res.jsonp({error: response.statusCode});   
+            }
+        });
+
+    });
+    
     app.get('/client/location', function(req,res){
         res.render('client-location');
     });
