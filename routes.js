@@ -1,4 +1,5 @@
 var passport = require('passport')
+    , request = require('request')
     , Account = require('./models/account')
     , Location = require('./models/location')
     , Blog = require('./models/blog');
@@ -194,6 +195,35 @@ module.exports = function(app, server) {
             res.jsonp({locations: geoJSONLocations});
 
         });
+    });
+    
+    app.get('/api/get/checkins', function(req, res){
+       
+        //Variables
+        var limit = 250;
+        var oauth_token = 'WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU';   //TODO: Get from user object or database
+        
+        //Get max number of checkins to return
+        if(req.query.limit && (req.query.limit < 250)){
+                limit = req.query.limit;
+        }
+        
+        //Build GET Checking URL
+        var host = 'https://api.foursquare.com';
+        
+        var path = '/v2/users/56072394/checkins?v=20140212' 
+            + '&limit=' + limit 
+            + '&oauth_token=' + oauth_token;
+        
+        //Make request and return data
+        request.get(host + path, function(error, response, body){
+            if (!error && response.statusCode == 200) {
+                res.send(JSON.parse(body));
+            } else {
+                res.jsonp({error: response.statusCode});   
+            }
+        });
+
     });
 
     app.get('/client/location', function(req,res){

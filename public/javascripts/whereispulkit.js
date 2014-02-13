@@ -322,9 +322,8 @@
 		};
 
 		var drawFoursquare = function() {
-			var foursquare_checkin_url = 'https://api.foursquare.com/v2/users/56072394/checkins?oauth_token=WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU&limit=250';
-
-
+			//var foursquare_checkin_url = 'https://api.foursquare.com/v2/users/56072394/checkins?oauth_token=WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU&limit=250';
+            var foursquare_checkin_url = '/api/get/checkins';
 
 			$.get(
 				foursquare_checkin_url,
