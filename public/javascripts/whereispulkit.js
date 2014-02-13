@@ -8,7 +8,6 @@
 		var previous_city = null;	//Keeping track of last known position
 		var path = null;			//Polyline of path
 		var positionMarker = null;	//Marker for current position
-        var markers = null;         //Marker group
 
 		var initialize = function(options) {
 			console.log('Initialize');
@@ -121,15 +120,9 @@
 
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
 
-                    //Create marker group
-                    markers = new L.MarkerClusterGroup({ spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: true });
-                    
 					drawGeoData(data);
 					drawFoursquare();
 					drawFlickr();
-                    
-                    //Add markers
-				    map.addLayer(markers);
 				},
 				complete: function (){
 					ajaxNotification.close();
