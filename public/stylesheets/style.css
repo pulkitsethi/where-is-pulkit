@@ -136,6 +136,7 @@ body {
 .whereispulkit-bar a, .whereispulkit-bar a:hover{
   width: 89px;
   padding-left: 15px;
+  padding-top: 4px;
 }
 
 .whereispulkit-control-max-zoom-in, .whereispulkit-control-max-zoom-out, .leaflet-control-zoom-out, .leaflet-control-zoom-in {
