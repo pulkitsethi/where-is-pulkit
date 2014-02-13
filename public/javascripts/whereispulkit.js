@@ -8,6 +8,7 @@
 		var previous_city = null;	//Keeping track of last known position
 		var path = null;			//Polyline of path
 		var positionMarker = null;	//Marker for current position
+        var markers = null;         //Marker group
 
 		var initialize = function(options) {
 			console.log('Initialize');
@@ -120,9 +121,15 @@
 
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
 
+                    //Create marker group
+                    markers = new L.MarkerClusterGroup({ spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: true });
+                    
 					drawGeoData(data);
 					drawFoursquare();
 					drawFlickr();
+                    
+                    //Add markers
+				    map.addLayer(markers);
 				},
 				complete: function (){
 					ajaxNotification.close();
@@ -322,43 +329,27 @@
 		};
 
 		var drawFoursquare = function() {
-			//var foursquare_checkin_url = 'https://api.foursquare.com/v2/users/56072394/checkins?oauth_token=WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU&limit=250';
             var foursquare_checkin_url = '/api/get/checkins';
 
 			$.get(
 				foursquare_checkin_url,
 				function(data){
-					var markers = new L.MarkerClusterGroup();
 
 					$.each(data.response.checkins.items, function(index, item){
 						var lat = item.venue.location.lat;
 						var lng = item.venue.location.lng;
-						var iconUrl = item.venue.categories[0].icon;
-
-						//iconUrl = iconUrl.replace('categories', 'categories_v2');
-						//iconUrl = iconUrl.replace('.png', '_32.png');
+                        
+                        var icon = item.venue.categories[0].icon;
+						var iconUrl = icon.prefix + 'bg_32' + icon.suffix;
+                        
+                        var venueUrl = 'https://foursquare.com/v/' + item.venue.id;
 
 						var position = new L.LatLng(lat, lng);
-
-
-						//OLD WAY
-						/*
-
-						var foursquareIcon = L.icon({
-						    iconUrl: iconUrl
-						    , iconSize: [32, 32]
-						    , iconAnchor:   [16, 41]
-						    , popupAnchor: [0, -51]
-						    , className: 'foursquare-marker-icon'
-						});
-					*/
 
 						var foursquareIcon = L.AwesomeMarkers.icon({
 							icon: 'foursquare', 
 							color: 'blue'
 						});
-
-						
 
 						var foursquareMarker = L.marker(position, {
 							icon: foursquareIcon
@@ -366,43 +357,25 @@
 							, bounceOnAdd: true
 						});
 						
-						var popupHtml = "<div class='category'> <img src=' " + iconUrl + "'/> </div>";
-						popupHtml += "<div class='venueName'>" + item.venue.name + "</div>";
+						var popupHtml = "<div class='category'> <img src='" + iconUrl + "'/> </div>";
+						popupHtml += "<a target='_blank' href='" + venueUrl +"'><div class='venueName'>" + item.venue.name + "</div></a>";
 
 						foursquareMarker
 						    .bindPopup(popupHtml, { autoPanPaddingTopLeft: [12, 80], maxWidth: 500, closeButton: false })
-          					.on('mouseover', function(e) { this.openPopup(); })
-        					.on('mouseout', function(e) { this.closePopup(); });
+          					.on('mouseover', function(e) { this.openPopup(); });
+        					//.on('mouseout', function(e) { this.closePopup(); });
 
         				//Adding marker to map
         				foursquareMarker.addTo(map);
 
-        				/* Add marker to cluster */
-
-						//markers.addLayer(foursquareMarker);
-						
-						//... Add more layers ...
-						//map.addLayer(markers);
-
-						
-
 					});
+                    
 				}
 			);
 		};
 
 		var drawFlickr = function(){
-			var flickr_api_url = 'https://secure.flickr.com/services/rest';
-			var method = 'flickr.photosets.getPhotos';
-			var api_key='4dda8f378cd2863df1fa1fdb7a8cb9d4';
-			var default_api_key = '17e92ae42d3b19b4dd753e4a70090b8f';
-			var photoset_id = '72157634661787837';
-			var extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
-			var format = 'json';
-
-			var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key +'&photoset_id=' + photoset_id + '&extras=' + extras +  '&format=' + format + '&nojsoncallback=1';
-
-
+			var flickr_photos_url = '/api/get/photos';
 
 			$.get(
 				flickr_photos_url,
@@ -419,9 +392,7 @@
                         var imgSource = photo_url_100_thumbnail;
                         var imgHeight = item.height_n;
                         var imgWidth = item.width_n;
-
-						//iconUrl = iconUrl.replace('categories', 'categories_v2');
-						//iconUrl = iconUrl.replace('.png', '_32.png');
+                        var imgPageUrl = 'http://www.flickr.com/photos/' + data.photoset.owner + '/' + item.id;
 
 						var position = new L.LatLng(lat, lng);
 
@@ -462,7 +433,7 @@
 				    	);
 
 						var popupHtml = "<div class='popup-img'> <img height='" + imgHeight + "' width='" + imgWidth + "' src=' " + photo_url_320_small + "'/> </div>";
-						popupHtml += "<div>" + title + "<a class='pull-right' href=''> <span class='glyphicon glyphicon-resize-full'></span>Flickr</a>" + "</div>" ;
+						popupHtml += "<div>" + title + "<a class='pull-right' target='_blank' href='" + imgPageUrl +"'> <span class='glyphicon glyphicon-resize-full'></span>Flickr</a>" + "</div>" ;
                         
 						flickrMarker
 						    .bindPopup(popupHtml, { autoPanPaddingTopLeft: [12, 80], maxWidth: 500, closeButton: false })
@@ -471,7 +442,6 @@
 						
         				//Adding marker to map
         				flickrMarker.addTo(map);
-
                         
 					});
 					
