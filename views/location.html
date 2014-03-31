@@ -5,29 +5,18 @@
     <title>{{title}}</title>
     
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="shortcut icon" sizes="128x148" href="/images/driving-car-icon-3.png">
+    <link rel="shortcut icon" sizes="128x148" href="/images/driving-car-icon-2.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-startup-image" href="/images/driving-car-icon-3.png">
+    <link rel="apple-touch-startup-image" href="/images/driving-car-icon-2.png">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <!--  <link href="/stylesheets/bootstrap.min.css" rel="stylesheet"> -->
-    <!--<link href="/stylesheets/bootstrap-responsive.min.css" rel="stylesheet">-->
-
-    <!-------- --------->
-
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-
-    <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css">
-
-    <!-------- --------->
-
-    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css">
     <link rel="stylesheet" href="/stylesheets/leaflet.awesome-markers.css">
-
-    <link href='//api.tiles.mapbox.com/mapbox.js/v1.5.0/mapbox.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css" >
+    <!--<link href='/stylesheets/mapbox-1.5.0.css' rel='stylesheet' />-->
     <link href="/stylesheets/style.css" rel="stylesheet" media="screen">
     <!--[if lte IE 8]>
     	<link href='http://api.tiles.mapbox.com/mapbox.js/v1.1.0/mapbox.ie.css' rel='stylesheet' />
@@ -56,7 +45,6 @@
     <div id="wrapper">
 
         <div id="header">
-
             <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -70,32 +58,11 @@
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav navbar-right">
-
                         <li class="active"><a href="/"><span class="glyphicon glyphicon-map-marker"></span> Location</a> </li>
 	                    <li><a href="/photos"><span class="glyphicon glyphicon-camera"></span> Photos</a></li>
                     </ul>
-                    
-                    <!--<li class="active"><a href="/"><span class="glyphicon glyphicon-home"></span> Home</a></li>-->
-                    <!--<li><a href="/blog"><span class="glyphicon-bookmark"></span> Blog</a></li>-->
-                    <!--<li><a href="/about"></a></li>-->
-
-                    <!--
-	              <li class="divider-vertical"></li>
-
-	              <li>
-
-	              {{#if user}}
-    				<a><i class="glyphicon-user"></i>{{user.firstName}}</a>
-    			  {{else}}
-    			    <a href="/login">Login</a>
-      			  {{/if}}
-      			  </li>
-      				-->
-                    <!--    </ul>
-	        -->
                 </div>
             </nav>
-
         </div>
 
         <!-- Status -->
@@ -107,36 +74,6 @@
                 </div>
             </div>
         </div>
-
-
-        <!-- Display Options -->
-                <!--
-        <div id="display-options">
-            <div class="well">
-                <h4>Display Options</h4>
-
-                <div class="row">
-                    <div class="col-lg-6">
-
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" value="photo"> Photos
-                        </label>
-                      </div>                        
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" value="checkin"> Checkins
-                        </label>
-                      </div>    
-                        
-                    </div>
-                </div>
-
-            </div>
-        </div>
-                -->
-        <!-- END DISPLAY OPTIONS -->
-
         
         <div id="container" class="wrap">
 
@@ -145,54 +82,33 @@
                 <div id="map-canvas" class="leaflet-container leaflet-fade-anim" style="position: relative;"></div>
             </div>
 
-            <!--
-		<div id="stream-container">
-		  <div id="stream-view">
-		    <ul id="stream-list">
-		      <li class="card">
-		        TEST ITEM
-		      </li>
-		    </ul>
-		  </div>
-		</div>
-		-->
-
         </div>
     </div>
 
     <!--Javascript-->
-    <script src="http://code.jquery.com/jquery.js"></script>
-
-    <script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
-    <script src='//api.tiles.mapbox.com/mapbox.js/v1.5.0/mapbox.js'></script>
+    <script type="text/javascript" src="/javascripts/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
     <script src="/socket.io/socket.io.js"></script>
 
-    <script src="/javascripts/jquery.galleryview-3.0-dev.js"></script>
-
     <script type="text/javascript" src="/javascripts/noty/jquery.noty.js"></script>
-
     <script type="text/javascript" src="/javascripts/noty/layouts/top.js"></script>
     <script type="text/javascript" src="/javascripts/noty/layouts/topLeft.js"></script>
     <script type="text/javascript" src="/javascripts/noty/layouts/topRight.js"></script>
     <script type="text/javascript" src="/javascripts/noty/layouts/topCenter.js"></script>
     <script type="text/javascript" src="/javascripts/noty/layouts/center.js"></script>
     <script type="text/javascript" src="/javascripts/noty/themes/default.js"></script>
-
-    <script src="http://maximeh.github.io/leaflet.bouncemarker/bouncemarker.js"></script>
+    <script type="text/javascript" src="/javascripts/bouncemarker.js"></script>
     <script type="text/javascript" src="/javascripts/leaflet.markercluster.js"></script>
-
     <script type="text/javascript" src="/javascripts/leaflet.awesome-markers.min.js"></script>
 
-
     <script type="text/javascript" src="/javascripts/whereispulkit.js"></script>
+    
     <script>
         $(function() {
             WhereIsPulkit.init({
                 element: 'map-canvas'
             });
-
-            //whereispulkit.initialize();
-
         });
     </script>
 
