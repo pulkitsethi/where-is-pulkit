@@ -2,8 +2,42 @@ var passport = require('passport')
     , request = require('request')
     , Account = require('./models/account')
     , Location = require('./models/location')
-    , Blog = require('./models/blog');
+    , Blog = require('./models/blog')
+    , NodeCache = require('node-cache');
 
+var myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
+
+myCache.on( "expired", function( key, value ){
+    console.log('EXPIRED - CHACHE: ' + key);
+    
+    if(key === 'locations'){
+        Location.find().sort({timestamp: 1}).exec(function(err, locations){
+            if(err){
+                console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
+            }
+
+            //Converting locations into geoJSON multistring
+            var coordinates = [];
+
+            for(key in locations){
+                coordinates.push([locations[key].longitude, locations[key].latitude]);
+            }
+
+            var geoJSONLocations =  { 
+                "type": "LineString",
+                "coordinates": coordinates
+            }
+
+            //Set cache for 1 day
+            myCache.set("locations", geoJSONLocations, 86400, function(err, success){
+                if(!err && success){
+                    console.log("CACHING: Locations");   
+                }
+            });
+
+        }); 
+    }
+});
 
 module.exports = function(app, server) {
 
@@ -56,8 +90,7 @@ module.exports = function(app, server) {
             }
 
         });
-
-        //res.render('blog', {title: 'Where Is Pulkit', posts: Blog.find() });
+        
     });
 
     //ADMIN
@@ -123,109 +156,83 @@ module.exports = function(app, server) {
         //Log input params
         //console.log("Coordinates recieved: (" + req.body.latitude + "," + req.body.longitude + ")");
 
-        //location = new Location({ latitude: req.body.latitude, longitude: req.body.longitude, timestamp: req.body.timestamp });
+        //Check if path is cached
+        myCache.get("locations", function(err, value){
+            
+            //If error OR returned empty object, grab fresh copy DB
+            if(err || (Object.keys(value).length === 0)){
+                console.log('CACHE MISS: Locations');
 
+                Location.find().sort({timestamp: 1}).exec(function(err, locations){
+                    if(err){
+                        console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
+                    }
 
-        //var bQuery = new Date().getTime();
+                    //Converting locations into geoJSON multistring
+                    var coordinates = [];
 
-        Location.find().sort({timestamp: 1}).exec(function(err, locations){
-            if(err){
-                console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
+                    for(key in locations){
+                        coordinates.push([locations[key].longitude, locations[key].latitude]);
+                    }
+
+                    var geoJSONLocations =  { 
+                        "type": "LineString",
+                        "coordinates": coordinates
+                    }
+
+                    //Set cache for 1 day
+                    myCache.set("locations", geoJSONLocations, 86400, function(err, success){
+                        if(!err && success){
+                            console.log("CACHING: Locations");   
+                        }
+                    });
+
+                    //Render JSON
+                    res.jsonp({locations: geoJSONLocations});
+
+                });
+            } else{
+                console.log('CACHE HIT: Locations');
+                res.jsonp({locations: value.locations});
             }
-
-            //var aQuery = new Date().getTime();
-            //var queryDiff = aQuery - bQuery;
-            //console.log('Time to query: ' + queryDiff);
-
-            //Converting locations into geoJSON multistring
-            var coordinates = [];
-
-            //var n1 = new Date().getTime();
-
-            for(key in locations){
-                coordinates.push([locations[key].longitude, locations[key].latitude]);
-            }
-
-            //var n2 = new Date().getTime();
-
-            var geoJSONLocations =  { 
-                "type": "LineString",
-                "coordinates": coordinates
-            }
-
-            //console.log(geoJSONLocations);
-
-            //var diff = n2 - n1;         
-            //console.log("Time to convert points: " + diff);
-            //var n3 = new Date().getTime();
-
-            //Render JSON
-            res.jsonp({locations: geoJSONLocations});
-
-            //var n4 = new Date().getTime();
-            //var diffRender = n4 - n3;
-            //console.log("Time to render json: " + diffRender);
-        });
-    });
-
-    //Get location
-    app.get('/api/get/currentLocation', function(req, res){
-        //Log input params
-
-        Location.find().sort({timestamp: 1}).exec(function(err, locations){
-            if(err){
-                console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
-            }
-
-            //Converting locations into geoJSON multistring
-            var coordinates = [];
-
-            for(key in locations){
-                coordinates.push([locations[key].longitude, locations[key].latitude]);
-            }
-
-            var geoJSONLocations =  { 
-                "type": "LineString",
-                "coordinates": coordinates
-            }
-
-            //console.log(geoJSONLocations);
-
-            //Render JSON
-            res.jsonp({locations: geoJSONLocations});
-
         });
     });
     
+    
+    
     app.get('/api/get/checkins', function(req, res){
-       
-        //Variables
-        var limit = 250;
-        var afterTimestamp = 1370034000;  //Epoch Seconds
-        var beforeTimestamp = 1379278800;   //Epoch Seconds
-        var oauth_token = 'WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU';   //TODO: Get from user object or database
         
-        //Get max number of checkins to return
-        if(req.query.limit && (req.query.limit < 250)){
-                limit = req.query.limit;
-        }
-        
-        //Build GET Checkin URL
-        var host = 'https://api.foursquare.com';
-        
-        var path = '/v2/users/56072394/checkins?v=20140212' 
-            + '&limit=' + limit 
-            + '&afterTimestamp=' + afterTimestamp
-            + '&beforeTimestamp=' + beforeTimestamp
-            + '&oauth_token=' + oauth_token;
-        
-        //Make request and return data
-        request.get(host + path, function(error, response, body){
-            if (!error && response.statusCode == 200) {
-                res.send(JSON.parse(body));
-            } else {
-                res.jsonp({error: response.statusCode});   
+        //Check if path is cached
+        myCache.get("locations", function(err, value){
+            //Variables
+            var limit = 250;
+            var afterTimestamp = 1370034000;  //Epoch Seconds
+            var beforeTimestamp = 1379278800;   //Epoch Seconds
+            var oauth_token = 'WX1FSFLPNCX105CIRFFFFJRONVRLIAAAIBLBJYGNALV0DLNU';   //TODO: Get from user object or database
+
+            //Get max number of checkins to return
+            if(req.query.limit && (req.query.limit < 250)){
+                    limit = req.query.limit;
             }
+
+            //Build GET Checkin URL
+            var host = 'https://api.foursquare.com';
+
+            var path = '/v2/users/56072394/checkins?v=20140212' 
+                + '&limit=' + limit 
+                + '&afterTimestamp=' + afterTimestamp
+                + '&beforeTimestamp=' + beforeTimestamp
+                + '&oauth_token=' + oauth_token;
+
+            //Make request and return data
+            request.get(host + path, function(error, response, body){
+                if (!error && response.statusCode == 200) {
+                    res.send(JSON.parse(body));
+                } else {
+                    res.jsonp({error: response.statusCode});   
+                }
+            });
+            
         });
 
     });
