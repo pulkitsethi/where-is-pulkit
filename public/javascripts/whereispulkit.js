@@ -57,8 +57,8 @@
 				//Log
 				console.log('Map loaded');
 
-				map.touchZoom = false;
-				map.scrollWheelZoom = false;
+				//map.touchZoom = false;
+				//map.scrollWheelZoom = false;
 
 				//Updating data on map
 				updateMap();
