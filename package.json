@@ -1,6 +1,6 @@
 {
   "name": "where-is-pulkit",
-  "version": "0.0.2-18",
+  "version": "0.0.2-24",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -16,6 +16,7 @@
     "passport-local-mongoose": "0.2.2",
     "mongoose": "3.6.11",
     "request": "2.33.0",
+    "node-cache": "0.4.1",
     "connect": "2.7.9"
   },
   "subdomain": "whereispulkit",

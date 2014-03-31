@@ -1,10 +1,6 @@
 /**
  * Module dependencies.
  */
-require('nodetime').profile({
-    accountKey: 'fd3f5939077defec93412b83476fc113c3fa32b8', 
-    appName: 'Where Is Pulkit'
-  });
 
 var express = require('express')
   , http = require('http')
@@ -49,7 +45,7 @@ app.configure('development', function(){
 
 app.configure('production', function(){
   app.use(express.errorHandler()); 
-    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit')
+    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10032/where-is-pulkit')
 });
 
 var server = http.createServer(app);
