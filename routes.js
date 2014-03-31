@@ -1,6 +1,5 @@
 var passport = require('passport')
     , request = require('request')
-    , Account = require('./models/account')
     , Location = require('./models/location')
     , NodeCache = require('node-cache');
 
