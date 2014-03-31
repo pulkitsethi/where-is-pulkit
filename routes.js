@@ -72,8 +72,6 @@ var cacheCheckins = function (ttl, limit, callback){
             var body = JSON.parse(body);
             checkins = body;//.response.checkins;
             
-            //console.log(checkins);
-            
             //Cache checkins
             myCache.set("checkins", checkins, ttl, function(err, success){
                 if(!err && success){
@@ -86,6 +84,46 @@ var cacheCheckins = function (ttl, limit, callback){
         if (callback && typeof(callback) === "function") {
             // execute the callback, passing parameters as necessary
             callback(error, checkins);
+        }
+        
+    });
+}
+
+var cachePhotos = function(ttl, callback){
+     //Variables
+    var flickr_api_url = 'https://secure.flickr.com/services/rest';
+    var method = 'flickr.photosets.getPhotos';
+    var api_key = Services.flickr.api_key;
+    var photoset_id = Services.flickr.photoset_id;
+    var extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
+    var format = 'json';
+
+    //Build GET Checking URL
+    var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
+
+    var photos = null;
+    
+    //Make request and return data
+    request.get(flickr_photos_url, function(error, response, body){
+        if (!error && response.statusCode == 200) {
+            
+            //Format data
+            var body = JSON.parse(body);
+            photos = body;
+            
+            //Cache photos
+            myCache.set("photos", photos, ttl, function(err, success){
+                if(!err && success){
+                    console.log("CACHING: Photos");   
+                }
+            });
+            
+        }
+        
+        //Callback
+        if (callback && typeof(callback) === "function") {
+            // execute the callback, passing parameters as necessary
+            callback(error, photos);
         }
         
     });
@@ -194,6 +232,7 @@ module.exports = function(app, server) {
             if(err || (Object.keys(value).length === 0)){
                 console.log('CACHE MISS: Checkins');
                 
+                //Cache for 1 day
                 cacheCheckins(86400, limit, response);
             } else{
                 console.log('CACHE HIT: Checkins');
@@ -206,26 +245,32 @@ module.exports = function(app, server) {
     });
 
     app.get('/api/get/photos', function(req, res){
-         //Variables
-        var flickr_api_url = 'https://secure.flickr.com/services/rest';
-        var method = 'flickr.photosets.getPhotos';
-        var api_key = Services.flickr.api_key;
-        var photoset_id = Services.flickr.photoset_id;
-        var extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
-        var format = 'json';
-
-        //Build GET Checking URL
-        var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
-        
-        //Make request and return data
-        request.get(flickr_photos_url, function(error, response, body){
-            if (!error && response.statusCode == 200) {
-                res.send(JSON.parse(body));
+        //Creating response callback function
+        var response = function(err, photos){
+            if(err){
+                res.jsonp(500, {error: 'Error getting photos'}); 
             } else {
-                res.jsonp({error: response.statusCode});   
+                //res.jsonp({checkins: checkins});
+                res.jsonp(photos);
+            }
+        }
+        
+        //Check if locations are cached
+        myCache.get("photos", function(err, value){
+            
+            //If not cached, grab fresh copy from DB and cache. Otherwise return cache
+            if(err || (Object.keys(value).length === 0)){
+                console.log('CACHE MISS: Photos');
+                
+                //Cache for 1 day
+                cachePhotos(86400, response);
+            } else{
+                console.log('CACHE HIT: Photos');
+                
+                //res.jsonp({checkins: value.photos});
+                res.jsonp(value.photos);
             }
         });
-
     });
 
 };
