@@ -2,6 +2,10 @@
 /**
  * Module dependencies.
  */
+require('nodetime').profile({
+    accountKey: 'fd3f5939077defec93412b83476fc113c3fa32b8', 
+    appName: 'Where Is Pulkit'
+  });
 
 var express = require('express')
   , http = require('http')
@@ -9,6 +13,7 @@ var express = require('express')
   , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
   , passport = require('passport')
+  , twitter = require('ntwitter')
   , Location = require('./models/location');
   //, LocalStrategy = require('passport-local').Strategy
   //, GoogleStrategy = require('passport-google').Strategy;
@@ -21,7 +26,9 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.engine('html', consolidate.handlebars);
   app.set('view engine', 'html');
-
+    
+  app.use(express.compress());
+    
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
@@ -43,14 +50,19 @@ app.configure('development', function(){
 
   // Connect mongoose
   //mongoose.connect('mongodb://localhost/whereispulkit');
-  mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
+  ///mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
+    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit-dev')
+    
 });
 
 app.configure('production', function(){
   app.use(express.errorHandler()); 
 
-  // Connect mongoose
-  mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
+  //Original Production
+            //mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
+    
+    //New Prod
+    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit')
 });
 
 /**
@@ -97,39 +109,6 @@ app.post('/api/save/location', function(req, res){
     });
 });
 
-/**
-  //Initializing to Springfield Mixing bowl
-  newLat = 38.788345;
-  newLong = -77.163849;
-
-  
-  //Mock position data emited every 3 seconds
-  setInterval(function() {
-    newLat = newLat + .001;
-    newLong = newLong + .001;
-    
-    io.sockets.emit('position-update', { lat: newLat, long: newLong });
-  }, 3000);
-**/
-
-/**
-io.sockets.on('connection', function (socket) {
-  //Initializing to Springfield Mixing bowl
-  newLat = 38.788345;
-  newLong = -77.163849;
-
-  
-  //Mock position data emited every 3 seconds
-  setInterval(function() {
-    newLat = newLat + .0001;
-    newLong = newLong + .0001;
-    
-    socket.emit('position-update', { lat: newLat, long: newLong });
-  }, 3000);
-  
-
-});
-**/
 
 //Start server
 server.listen(app.get('port'), function(){
