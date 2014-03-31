@@ -151,7 +151,7 @@
 			   var n = noty({
 			   		text: text,
 			   		type: type,
-			      		dismissQueue: true,
+			        dismissQueue: true,
 			   		layout: layout,
 			   		theme: 'defaultTheme',
 			   		timeout: timeout
