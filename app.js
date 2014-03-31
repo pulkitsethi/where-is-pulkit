@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -13,10 +12,7 @@ var express = require('express')
   , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
   , passport = require('passport')
-  , twitter = require('ntwitter')
   , Location = require('./models/location');
-  //, LocalStrategy = require('passport-local').Strategy
-  //, GoogleStrategy = require('passport-google').Strategy;
 
 var app = express();
 
@@ -47,33 +43,14 @@ app.configure(function(){
 app.configure('development', function(){
 
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-
-  // Connect mongoose
-  //mongoose.connect('mongodb://localhost/whereispulkit');
-  ///mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
     mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit-dev')
     
 });
 
 app.configure('production', function(){
   app.use(express.errorHandler()); 
-
-  //Original Production
-            //mongoose.connect('mongodb://nodejitsu:bb76e643bb93517a1ec1a299d3d4e771@alex.mongohq.com:10033/nodejitsudb642845281');
-    
-    //New Prod
     mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit')
 });
-
-/**
-// Configure passport
-var Account = require('./models/account');
-
-passport.use(new LocalStrategy(Account.authenticate()));
-
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-**/
 
 var server = http.createServer(app);
 
