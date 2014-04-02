@@ -10,9 +10,8 @@
 		var positionMarker = null;	//Marker for current position
 
 		var initialize = function(options) {
-			console.log('Initialize');
-
-			
+			//console.log('Initialize');
+            
 			if(location.hash){
 				var url_opts = location.hash.slice(1).split(',');
 
@@ -55,7 +54,7 @@
 			//MAP Event - load
 			map.whenReady(function(){
 				//Log
-				console.log('Map loaded');
+				//console.log('Map loaded');
 
 				//map.touchZoom = false;
 				//map.scrollWheelZoom = false;
@@ -69,7 +68,7 @@
 				var zoom = map.getZoom();
 				var latlng = map.getCenter();
 
-				console.log('Zoomend: ' + zoom);
+				//console.log('Zoomend: ' + zoom);
 
 				//Update URL
 		    	//location.hash = 'z=' + zoom + '&' + 'latlng=' + latlng.lat + ',' + latlng.lng;
@@ -77,12 +76,12 @@
 			});
 
 			//Socket
-			var socket = io.connect(window.location.origin);
+			var socket = io.connect(window.location.protocol + "//" + window.location.host);
 			  
 			//SOCKET.IO - Listening to position updates
 			socket.on('position-update', function (data) {
 				//console.log(data);
-				console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
+				//console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
 
 			    //Cacheing last known position locally to be used by other functions
 			    current_position.lat = data.lat;
@@ -105,8 +104,8 @@
 			var ajaxNotification = {};	//Notification object
 
 			//Get geo data and load into map
-			var url = window.location.origin + '/api/get/location';
-
+            var url = '/api/get/location';
+            
 			//Get location data
 			$.ajax({
 				type: "GET",
@@ -127,7 +126,8 @@
 				complete: function (){
 					ajaxNotification.close();
 				},
-				error: function (){
+				error: function (request, status, error){
+                    alert(request.responseText);
 					generateNotification('error', 'center', 'Can not find Pulkit :( Please try again shortly.');
 				}
 			});
@@ -167,7 +167,7 @@
 		//Displays data on map
 		var drawGeoData = function(data, callback){
 			//Debugging
-			console.log('Draw Geo Data');
+			//console.log('Draw Geo Data');
 
 			var pointList = [];
 			var coords = data.locations.coordinates;
@@ -261,7 +261,7 @@
 
 		var updateCity = function(lat, lng, callback){
 			//Debugging
-			console.log('Locating city...');
+			//console.log('Locating city...');
 
 			//Variables
 			var current_lat = null;			//Local scoped lat
@@ -289,7 +289,7 @@
 			       $.each(data.results[0], function (index, item){
 			       		if(item.type == 'CDP' || item.type == 'city'){
 			       			//Debugging
-			       			console.log('City: ' + item.name);
+			       			//console.log('City: ' + item.name);
 
 			       			city = item.name;
 			       		}
@@ -451,7 +451,7 @@
 		    },
 
 		    onAdd: function (map) {
-		    	console.log('Max Zoom Control onAdd')
+		    	//console.log('Max Zoom Control onAdd')
 		        // create the control container with a particular class name
 		        var maxZoomName = 'whereispulkit-control-max-zoom', 
 		        	container = L.DomUtil.create('div', 'whereispulkit-bar leaflet-bar');
