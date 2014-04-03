@@ -136,6 +136,8 @@ myCache.on( "expired", function( key, value ){
         cacheLocations(86400);
     } else if (key === 'checkins'){
         cacheCheckins(86400);   
+    } else if (key === 'photos'){
+        cachePhotos(86400);   
     }
 });
 
