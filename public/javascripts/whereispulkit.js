@@ -127,7 +127,6 @@
 					ajaxNotification.close();
 				},
 				error: function (request, status, error){
-                    alert(request.responseText);
 					generateNotification('error', 'center', 'Can not find Pulkit :( Please try again shortly.');
 				}
 			});
