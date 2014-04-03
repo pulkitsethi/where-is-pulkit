@@ -274,19 +274,9 @@
         };
 
         var loadPhotos = function(element, formatPhotosCallback, alwaysCallback) {
-            var flickr_api_url = 'https://secure.flickr.com/services/rest';
-            var method = 'flickr.photosets.getPhotos';
-            var api_key = '4dda8f378cd2863df1fa1fdb7a8cb9d4';
-            var default_api_key = '17e92ae42d3b19b4dd753e4a70090b8f';
-            var photoset_id = '72157634661787837';
-            var extras = 'geo%2C+url_t%2C+url_n%2C+url_z%2C+url_c%2C+path_alias';
-            var format = 'json';
-
-            var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
-
 
             //AJAX to grab photo urls
-            $.get(flickr_photos_url)
+            $.get('/api/get/photos')
                 .done(function(data) {
 
                     $.each(data.photoset.photo, function(index, item) {
@@ -294,7 +284,7 @@
                         var lng = item.longitude;
                         var photo_thumbnail_url = item.url_t;
                         var photo_small_url = item.url_n;
-                        var photo_medium_url = item.url_z;
+                        //var photo_medium_url = item.url_z;
                         var photo_large_url = item.url_c;
                         var height = item.height_n;
                         var width = item.width_n;
