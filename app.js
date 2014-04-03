@@ -8,6 +8,7 @@ var express = require('express')
   , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
   , passport = require('passport')
+  , Services = require('./config/services')
   , Location = require('./models/location');
 
 var app = express();
@@ -37,15 +38,14 @@ app.configure(function(){
 });
 
 app.configure('development', function(){
-
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10046/where-is-pulkit-dev')
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+    mongoose.connect(Services.mongodb.dev);
     
 });
 
 app.configure('production', function(){
-  app.use(express.errorHandler()); 
-    mongoose.connect('mongodb://user:mongodbrules@troup.mongohq.com:10032/where-is-pulkit')
+    app.use(express.errorHandler()); 
+    mongoose.connect(Services.mongodb.prod);
 });
 
 var server = http.createServer(app);
