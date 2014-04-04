@@ -178,3 +178,7 @@ body {
   line-height: 1.4em;
 }
 
+.left-bottom .github-fork-ribbon {
+    background-color: #333;
+}
+
