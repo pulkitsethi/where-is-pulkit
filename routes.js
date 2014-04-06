@@ -1,8 +1,8 @@
 var passport = require('passport')
     , request = require('request')
+    , NodeCache = require('node-cache')
     , Location = require('./models/location')
-    , Services = require('./config/services')
-    , NodeCache = require('node-cache');
+    , Services = require('./config/services');
 
 //Setup Application Level Cache
 var myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
@@ -141,7 +141,7 @@ myCache.on( "expired", function( key, value ){
     }
 });
 
-module.exports = function(app, server) {
+module.exports = function(app, io) {
 
     //Set up socket
     //var io = require('socket.io').listen(server);
@@ -274,6 +274,34 @@ module.exports = function(app, server) {
             }
         });
     });
+    
+    //Save location
+    app.post('/api/save/location', function(req, res){
+        //Variables
+        var latitude = req.body.latitude;
+        var longitude = req.body.longitude;
+        var timestamp = req.body.timestamp;
+
+        //Log input params
+        console.log("Coordinates recieved: (" + latitude + "," + longitude + ")");
+
+        var location = new Location({ latitude: latitude, longitude: longitude, timestamp: timestamp });
+
+        //Saving location to database
+        location.save(function(err) {
+
+          if(err){
+            res.send('FAIL');
+          } else {
+            res.send('SUCCESS');
+          }
+
+          console.log("Coordinates emitted: (" + latitude + "," + longitude + ")");
+          io.sockets.emit('position-update', { lat: latitude, long: longitude });
+
+        });
+    });
+
 
 };
 

@@ -62,6 +62,7 @@ if ('production' == app.get('env')) {
     // enable all transports (optional if you want flashsocket support, please note that some hosting
     // providers do not allow you to create servers that listen on a port different than 80 or their
     // default port)
+    /*
     io.set('transports', [
         'websocket'
       , 'flashsocket'
@@ -69,38 +70,11 @@ if ('production' == app.get('env')) {
       , 'xhr-polling'
       , 'jsonp-polling'
     ]);
+    */
 }
 
 // Setup routes
-require('./routes')(app, server);
-
-//Save location
-app.post('/api/save/location', function(req, res){
-    //Variables
-    var latitude = req.body.latitude;
-    var longitude = req.body.longitude;
-    var timestamp = req.body.timestamp;
-
-    //Log input params
-    console.log("Coordinates recieved: (" + latitude + "," + longitude + ")");
-
-    var location = new Location({ latitude: latitude, longitude: longitude, timestamp: timestamp });
-
-    //Saving location to database
-    location.save(function(err) {
-
-      if(err){
-        res.send('FAIL');
-      } else {
-        res.send('SUCCESS');
-      }
-
-      console.log("Coordinates emitted: (" + latitude + "," + longitude + ")");
-      io.sockets.emit('position-update', { lat: latitude, long: longitude });
-
-    });
-});
-
+require('./routes')(app, io);
 
 //Start server
 server.listen(app.get('port'), function(){
