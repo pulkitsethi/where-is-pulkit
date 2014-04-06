@@ -6,7 +6,6 @@ var request = require('request')
 //Setup Application Level Cache
 var myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
-
 var cacheLocations = function (ttl, callback){
     Location.find().sort({timestamp: 1}).exec(function(err, locations){
         if(err){
@@ -300,7 +299,6 @@ module.exports = function(app, io) {
 
         });
     });
-
-
+    
 };
 
