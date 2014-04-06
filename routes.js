@@ -1,5 +1,4 @@
-var passport = require('passport')
-    , request = require('request')
+var request = require('request')
     , NodeCache = require('node-cache')
     , Location = require('./models/location')
     , Services = require('./config/services');

@@ -7,7 +7,6 @@ var express = require('express')
   , path = require('path')
   , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
-  , passport = require('passport')
   , Services = require('./config/services')
   , Location = require('./models/location');
 
@@ -26,12 +25,6 @@ app.configure(function(){
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-
-  //app.use(express.cookieParser());
-  //app.use(express.session({ secret: 'hakui is cool'}));
-
-  app.use(passport.initialize());
-  app.use(passport.session());
   
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));  //Removes "public" from url
