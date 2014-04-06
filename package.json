@@ -1,6 +1,6 @@
 {
   "name": "where-is-pulkit",
-  "version": "0.0.2-38",
+  "version": "0.0.2-66",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -10,10 +10,6 @@
     "handlebars": "1.0.11",
     "consolidate": "0.9.1",
     "socket.io": "0.9.14",
-    "passport": "0.1.17",
-    "passport-google": "0.3.0",
-    "passport-local": "0.1.6",
-    "passport-local-mongoose": "0.2.2",
     "mongoose": "3.6.11",
     "request": "2.33.0",
     "node-cache": "0.4.1",
