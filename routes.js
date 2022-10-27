@@ -143,11 +143,6 @@ module.exports = (app, io) => {
     //Set up socket
     //var io = require('socket.io').listen(server);
 
-    app.get('/test', (req, res) => {
-        //res.render('test', { title: 'Where Is Pulkit', user: req.user });
-        res.sendFile(path.join(__dirname+'/views/location.html'))
-    });
-
     app.get('/', (req, res) => {
         //res.render('location', { title: 'Where Is Pulkit', user: req.user });
         res.sendFile(path.join(__dirname+'/views/location.html'))
