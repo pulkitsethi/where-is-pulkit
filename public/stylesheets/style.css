@@ -27,7 +27,7 @@ body {
   padding-top: 10px
 }
 
-#map-view > #map-canvas{ 
+#map-view > #map{ 
   height: 100%;
   overflow: visible;
 }

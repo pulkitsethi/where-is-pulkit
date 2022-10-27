@@ -1,35 +1,37 @@
-var request = require('request')
-    , NodeCache = require('node-cache')
+const NodeCache = require('node-cache')
+    , path = require('path')
     , Location = require('./models/location')
     , Services = require('./config/services');
 
-//Setup Application Level Cache
-var myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
+const got = import('got');
 
-var cacheLocations = function (ttl, callback){
+//Setup Application Level Cache
+const myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
+
+const cacheLocations = (ttl, callback) => {
     Location.find().sort({timestamp: 1}).exec(function(err, locations){
         if(err){
             console.log("Error getting LOCATIONS");
         }
 
         //Converting locations into geoJSON multistring
-        var coordinates = [];
+        let coordinates = [];
 
-        for(key in locations){
+        for(let key in locations){
             coordinates.push([locations[key].longitude, locations[key].latitude]);
         }
 
-        var geoJSONLocations =  { 
+        const geoJSONLocations =  {
             "type": "LineString",
             "coordinates": coordinates
         }
 
         //Cache location
-        myCache.set("locations", geoJSONLocations, ttl, function(err, success){
-            if(!err && success){
-                console.log("CACHING: Locations");   
-            }
-        });
+        let success = myCache.set("locations", geoJSONLocations, ttl);
+
+        if(success){
+            console.log("CACHING: Locations");
+        }
 
         //Callback
         if (callback && typeof(callback) === "function") {
@@ -40,94 +42,91 @@ var cacheLocations = function (ttl, callback){
     });
 }
 
-var cacheCheckins = function (ttl, limit, callback){
+const cacheCheckins = (ttl, limit, callback) => {
    //Variables
-    var limit = 250;
-    var afterTimestamp = 1370034000;  //Epoch Seconds
-    var beforeTimestamp = 1379278800;   //Epoch Seconds
-    var oauth_token = Services.foursquare.oauth_token;
-    var user_id = Services.foursquare.user_id;
-    var checkins = null;
+    let localLimit = 250;
+    const afterTimestamp = 1370034000;  //Epoch Seconds
+    const beforeTimestamp = 1379278800;   //Epoch Seconds
+    const oauth_token = Services.foursquare.oauth_token;
+    const user_id = Services.foursquare.user_id;
+    let checkins = null;
     
     //Get max number of checkins to return
     if(limit && (limit < 250)){
-            limit = limit;
+            localLimit = limit;
     }
 
     //Build GET Checkin URL
-    var host = 'https://api.foursquare.com';
+    const host = 'https://api.foursquare.com';
 
-    var path = '/v2/users/' + user_id + '/checkins?v=20140212' 
-        + '&limit=' + limit 
+    const path = '/v2/users/' + user_id + '/checkins?v=20140212'
+        + '&limit=' + localLimit
         + '&afterTimestamp=' + afterTimestamp
         + '&beforeTimestamp=' + beforeTimestamp
         + '&oauth_token=' + oauth_token;
 
     //Make request and return data
-    request.get(host + path, function(error, response, body){
-        if (!error && response.statusCode == 200) {
-            //Format data
-            var body = JSON.parse(body);
-            checkins = body;//.response.checkins;
-            
-            //Cache checkins
-            myCache.set("checkins", checkins, ttl, function(err, success){
-                if(!err && success){
-                    console.log("CACHING: Checkins");   
-                }
-            });
-        }
-        
-        //Callback
-        if (callback && typeof(callback) === "function") {
-            // execute the callback, passing parameters as necessary
-            callback(error, checkins);
-        }
-        
-    });
+    got.get(host + path, {responseType: 'json'})
+      .then(res => {
+          //let body = JSON.parse(body);
+          const checkins = res.body;
+
+          //Cache checkins
+          myCache.set("checkins", checkins, ttl, (err, success) => {
+              if(!err && success){
+                  console.log("CACHING: Checkins");
+              }
+          });
+
+          //Callback
+          if (callback && typeof(callback) === "function") {
+              // execute the callback, passing parameters as necessary
+              callback(false, checkins);
+          }
+      })
+      .catch(err => {
+          callback(err);
+      });
 }
 
-var cachePhotos = function(ttl, callback){
+const cachePhotos = (ttl, callback) => {
      //Variables
-    var flickr_api_url = 'https://secure.flickr.com/services/rest';
-    var method = 'flickr.photosets.getPhotos';
-    var api_key = Services.flickr.api_key;
-    var photoset_id = Services.flickr.photoset_id;
-    var extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
-    var format = 'json';
+    const flickr_api_url = 'https://secure.flickr.com/services/rest';
+    const method = 'flickr.photosets.getPhotos';
+    const api_key = Services.flickr.api_key;
+    const photoset_id = Services.flickr.photoset_id;
+    const extras = 'geo%2C+url_t%2C+url_n%2C+url_c%2C+path_alias';
+    const format = 'json';
 
     //Build GET Checking URL
-    var flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
+    const flickr_photos_url = flickr_api_url + '/?' + 'method=' + method + '&api_key=' + api_key + '&photoset_id=' + photoset_id + '&extras=' + extras + '&format=' + format + '&nojsoncallback=1';
 
-    var photos = null;
+    let photos = null;
     
     //Make request and return data
-    request.get(flickr_photos_url, function(error, response, body){
-        if (!error && response.statusCode == 200) {
-            
-            //Format data
-            var body = JSON.parse(body);
-            photos = body;
-            
+    got.get(flickr_photos_url, {responseType: 'json'})
+        .then(res => {
+            photos = res.body;
+
             //Cache photos
             myCache.set("photos", photos, ttl, function(err, success){
                 if(!err && success){
-                    console.log("CACHING: Photos");   
+                    console.log("CACHING: Photos");
                 }
             });
-            
-        }
-        
-        //Callback
-        if (callback && typeof(callback) === "function") {
-            // execute the callback, passing parameters as necessary
-            callback(error, photos);
-        }
-        
-    });
+
+            //Callback
+            if (callback && typeof(callback) === "function") {
+                // execute the callback, passing parameters as necessary
+                callback(false, photos);
+            }
+        })
+        .catch(err => {
+            callback(err);
+        });
 }
 
-myCache.on( "expired", function( key, value ){
+myCache.on( "expired", (key, value) => {
     console.log('EXPIRED - CHACHE: ' + key);
     
     if(key === 'locations'){
@@ -139,29 +138,36 @@ myCache.on( "expired", function( key, value ){
     }
 });
 
-module.exports = function(app, io) {
+module.exports = (app, io) => {
 
     //Set up socket
     //var io = require('socket.io').listen(server);
 
-    app.get('/', function(req, res){
-        res.render('location', { title: 'Where Is Pulkit', user: req.user });
+    app.get('/test', (req, res) => {
+        //res.render('test', { title: 'Where Is Pulkit', user: req.user });
+        res.sendFile(path.join(__dirname+'/views/location.html'))
     });
 
-    app.get('/location', function(req, res){
-        res.render('location', { title: 'Where Is Pulkit', user: req.user });
+    app.get('/', (req, res) => {
+        //res.render('location', { title: 'Where Is Pulkit', user: req.user });
+        res.sendFile(path.join(__dirname+'/views/location.html'))
+    });
+
+    app.get('/location', (req, res) => {
+        //res.render('location', { title: 'Where Is Pulkit', user: req.user });
+        res.sendFile(path.join(__dirname+'/views/location.html'))
     });
 
     //Social Test
-    app.get('/social', function(req, res){
+    app.get('/social', (req, res) =>{
         res.render('social', { title: 'Where Is Pulkit', user: req.user });
     });
 
     //Photos
-    app.get('/photos', function(req, res){
-        var format = req.query.format;
+    app.get('/photos', (req, res) => {
+        let format = req.query.format;
 
-        if(format == 'json'){
+        if(format === 'json'){
             res.json('photo', {title: 'Where Is Pulkit'});
         } else {
             res.render('photo', {title: 'Where Is Pulkit'});
@@ -169,24 +175,23 @@ module.exports = function(app, io) {
     });
 
 
-    app.get('/admin/location', function(req, res){
+    app.get('/admin/location', (req, res) => {
 
-        Location.find(function(err, locations){
+        Location.find( (err, locations) => {
             if(err){
                 console.log("Error getting LOCATIONS"); //REPLACE WITH NICE 404??
             }
 
             res.render('admin/location', {title: 'Admin - Locations',  locations: locations});
-
         });
 
     });
     
     //------------API------------
-    app.get('/api/get/location', function(req, res){
+    app.get('/api/get/location', (req, res) => {
         
         //Creating response callback function
-        var response = function(err, locations){
+        let response = (err, locations) => {
             if(err) {
                 res.send(500, { error: 'Error getting locations' });
             } else {
@@ -195,7 +200,7 @@ module.exports = function(app, io) {
         }
 
         //Check if locations are cached
-        myCache.get("locations", function(err, value){
+        myCache.get("locations", (err, value) => {
             
             //If not cached, grab fresh copy from DB and cache. Otherwise return cache
             if(err || (Object.keys(value).length === 0)){
@@ -210,13 +215,13 @@ module.exports = function(app, io) {
         });
     });
     
-    app.get('/api/get/checkins', function(req, res){
+    app.get('/api/get/checkins', (req, res) => {
         
         //Get limit from url query
-        limit = req.query.limit;
+        let limit = req.query.limit;
         
         //Creating response callback function
-        var response = function(err, checkins){
+        let response = (err, checkins) => {
             if(err){
                 res.jsonp(500, {error: 'Error getting checkins'}); 
             } else {
@@ -226,27 +231,26 @@ module.exports = function(app, io) {
         }
         
         //Check if locations are cached
-        myCache.get("checkins", function(err, value){
+        let value = myCache.get("checkins");
             
-            //If not cached, grab fresh copy from DB and cache. Otherwise return cache
-            if(err || (Object.keys(value).length === 0)){
-                console.log('CACHE MISS: Checkins');
+        //If not cached, grab fresh copy from DB and cache. Otherwise return cache
+        if(value === undefined || (Object.keys(value).length === 0)){
+            console.log('CACHE MISS: Checkins');
                 
-                //Cache for 1 day
-                cacheCheckins(86400, limit, response);
-            } else{
-                console.log('CACHE HIT: Checkins');
+            //Cache for 1 day
+            cacheCheckins(86400, limit, response);
+        } else{
+            console.log('CACHE HIT: Checkins');
                 
-                //res.jsonp({checkins: value.checkins});
-                res.jsonp(value.checkins);
-            }
-        });
+            //res.jsonp({checkins: value.checkins});
+            res.jsonp(value.checkins);
+        }
 
     });
 
-    app.get('/api/get/photos', function(req, res){
+    app.get('/api/get/photos', (req, res) => {
         //Creating response callback function
-        var response = function(err, photos){
+        const response = (err, photos) => {
             if(err){
                 res.jsonp(500, {error: 'Error getting photos'}); 
             } else {
@@ -256,37 +260,37 @@ module.exports = function(app, io) {
         }
         
         //Check if locations are cached
-        myCache.get("photos", function(err, value){
+        let value = myCache.get("photos");
             
-            //If not cached, grab fresh copy from DB and cache. Otherwise return cache
-            if(err || (Object.keys(value).length === 0)){
-                console.log('CACHE MISS: Photos');
+        //If not cached, grab fresh copy from DB and cache. Otherwise return cache
+        if(value === undefined || (Object.keys(value).length === 0)){
+            console.log('CACHE MISS: Photos');
                 
-                //Cache for 1 day
-                cachePhotos(86400, response);
-            } else{
-                console.log('CACHE HIT: Photos');
+            //Cache for 1 day
+            cachePhotos(86400, response);
+        } else{
+            console.log('CACHE HIT: Photos');
                 
-                //res.jsonp({checkins: value.photos});
-                res.jsonp(value.photos);
-            }
-        });
+            //res.jsonp({checkins: value.photos});
+            res.jsonp(value.photos);
+        }
+
     });
     
     //Save location
-    app.post('/api/save/location', function(req, res){
+    app.post('/api/save/location', (req, res) => {
         //Variables
-        var latitude = req.body.latitude;
-        var longitude = req.body.longitude;
-        var timestamp = req.body.timestamp;
+        const latitude = req.body.latitude;
+        const longitude = req.body.longitude;
+        const timestamp = req.body.timestamp;
 
         //Log input params
         console.log("Coordinates recieved: (" + latitude + "," + longitude + ")");
 
-        var location = new Location({ latitude: latitude, longitude: longitude, timestamp: timestamp });
+        let location = new Location({ latitude: latitude, longitude: longitude, timestamp: timestamp });
 
         //Saving location to database
-        location.save(function(err) {
+        location.save( (err) => {
 
           if(err){
             res.send('FAIL');
