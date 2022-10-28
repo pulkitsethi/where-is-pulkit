@@ -41,18 +41,19 @@
 				}
 			}, hash_options, options);
 
-			
+			var map = L.map('map').setView([38.60313492038697, -97.94665625], 4);
+
 			//Setup map
-			map = L.mapbox.map(options.element, options.map.id, {
-					minZoom: options.map.minZoom, 
-					maxZoom: options.map.maxZoom,
-					zoom: options.map.zoom,
-					center: [options.map.center.lat, options.map.center.lng],
-					zoomControl: options.map.zoomControl
-			});
+			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				minZoom: options.map.minZoom, 
+				maxZoom: options.map.maxZoom,
+				zoom: options.map.zoom,
+				center: [options.map.center.lat, options.map.center.lng],
+				zoomControl: options.map.zoomControl
+			}).addTo(map);
 			
 			//MAP Event - load
-			map.whenReady(function(){
+			map.on('load', function(){
 				//Log
 				//console.log('Map loaded');
 

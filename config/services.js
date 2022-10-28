@@ -1,4 +1,4 @@
-var ids = {
+let ids = {
     foursquare: {
         oauth_token: "",
         user_id: ""

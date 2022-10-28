@@ -2,74 +2,63 @@
  * Module dependencies.
  */
 
-var express = require('express')
+const express = require('express')
+  , compression = require('compression')
+  , bodyParser = require('body-parser')
+  , favicon = require('serve-favicon')
+  , serveStatic = require('serve-static')
+  , errorHandler = require('errorhandler')
+  , morgan = require('morgan')
+  , handlebars = require('express-handlebars')
   , http = require('http')
   , path = require('path')
-  , consolidate = require('consolidate')  //Handlebars
   , mongoose = require('mongoose')
   , Services = require('./config/services')
   , Location = require('./models/location');
 
-var app = express();
+const app = express();
 
 //Configuration
-app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
-  app.set('views', __dirname + '/views');
-  app.engine('html', consolidate.handlebars);
-  app.set('view engine', 'html');
+app.set('port', process.env.PORT || 3000);
+
+app.engine('html', handlebars.engine);
+app.set('view engine', 'html');
+app.set('views', path.join(__dirname, '/views'));
     
-  app.use(express.compress());
-    
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
+app.use(compression());
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+//app.use(express.methodOverride());
+//app.use(favicon());
   
-  app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));  //Removes "public" from url
-});
+app.use(serveStatic(path.join(__dirname, 'public')));  //Removes "public" from url
 
-app.configure('development', function(){
-    app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+if (process.env.NODE_ENV === 'development') {
+    app.use(errorHandler({ dumpExceptions: true, showStack: true }));
     mongoose.connect(Services.mongodb.dev);
-    
-});
+}
 
-app.configure('production', function(){
-    app.use(express.errorHandler()); 
+if (process.env.NODE_ENV === 'production') {
+    app.use(errorHandler());
     mongoose.connect(Services.mongodb.prod);
-});
+}
 
-var server = http.createServer(app);
-
-var io = require('socket.io').listen(server);
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 // Prodcution settings for socket.io
-if ('production' == app.get('env')) {
+if (process.env.NODE_ENV === 'production') {
     io.enable('browser client minification');  // send minified client
     io.enable('browser client etag');          // apply etag caching logic based on version number
     io.enable('browser client gzip');          // gzip the file
     io.set('log level', 1);                    // reduce logging
-
-    // enable all transports (optional if you want flashsocket support, please note that some hosting
-    // providers do not allow you to create servers that listen on a port different than 80 or their
-    // default port)
-    /*
-    io.set('transports', [
-        'websocket'
-      , 'flashsocket'
-      , 'htmlfile'
-      , 'xhr-polling'
-      , 'jsonp-polling'
-    ]);
-    */
 }
 
 // Setup routes
 require('./routes')(app, io);
 
 //Start server
-server.listen(app.get('port'), function(){
+server.listen(app.get('port'), () => {
   console.log("Express server listening on %s:%d in %s mode", '127.0.0.1', app.get('port'), app.settings.env);
 });
