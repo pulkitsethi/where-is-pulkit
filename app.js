@@ -10,6 +10,7 @@ const express = require('express')
   , errorHandler = require('errorhandler')
   , morgan = require('morgan')
   , handlebars = require('express-handlebars')
+  , rateLimit = require('express-rate-limit')
   , http = require('http')
   , path = require('path')
   , mongoose = require('mongoose')
@@ -32,6 +33,15 @@ app.use(bodyParser.json());
 //app.use(favicon());
   
 app.use(serveStatic(path.join(__dirname, 'public')));  //Removes "public" from url
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+app.use(limiter);
 
 if (process.env.NODE_ENV === 'development') {
     app.use(errorHandler({ dumpExceptions: true, showStack: true }));
