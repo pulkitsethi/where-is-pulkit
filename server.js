@@ -9,7 +9,6 @@ const express = require('express')
   , serveStatic = require('serve-static')
   , errorHandler = require('errorhandler')
   , morgan = require('morgan')
-  , handlebars = require('express-handlebars')
   , rateLimit = require('express-rate-limit')
   , http = require('http')
   , path = require('path')
@@ -22,9 +21,7 @@ const app = express();
 //Configuration
 app.set('port', process.env.PORT || 3000);
 
-app.engine('html', handlebars.engine);
-app.set('view engine', 'html');
-app.set('views', path.join(__dirname, '/views'));
+app.set('view engine', 'pug');
     
 app.use(compression());
 app.use(morgan('dev'));
