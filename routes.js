@@ -144,13 +144,11 @@ module.exports = (app, io) => {
     //var io = require('socket.io').listen(server);
 
     app.get('/', (req, res) => {
-        //res.render('location', { title: 'Where Is Pulkit', user: req.user });
-        res.sendFile(path.join(__dirname+'/views/location.html'))
+        res.render('location', { title: 'Where Is Pulkit', user: req.user });
     });
 
     app.get('/location', (req, res) => {
-        //res.render('location', { title: 'Where Is Pulkit', user: req.user });
-        res.sendFile(path.join(__dirname+'/views/location.html'))
+        res.render('location', { title: 'Where Is Pulkit', user: req.user });
     });
 
     //Social Test

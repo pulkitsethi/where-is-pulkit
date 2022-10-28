@@ -1,0 +1,237 @@
+doctype html
+html
+  head
+    title= title
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css')
+    link(rel='stylesheet', href='/stylesheets/collagePlus/transitions.css')
+    link(rel='stylesheet', href='/javascripts/fancybox/jquery.fancybox.css', type='text/css', media='screen')
+    link(rel='stylesheet', href='/javascripts/fancybox/helpers/jquery.fancybox-thumbs.css', type='text/css', media='screen')
+    link(rel='stylesheet', href='/javascripts/fancybox/helpers/jquery.fancybox-buttons.css', type='text/css', media='screen')
+    style.
+      body{
+      background-color: #E6E6E6;
+      }
+      .Collage{
+      /* define how much padding you want in between your images */
+      padding:1px;
+      }
+      .Collage .Image-wrapper{
+      /* ensures padding at the bottom of the image is correct */
+      vertical-align:bottom;
+      /* hide the images until the plugin has run. the plugin will reveal the images*/
+      opacity:0;
+      /*
+      margin: 0;
+      padding: 0;
+      display: inline-block;
+      vertical-align: bottom;
+      opacity: 0;
+      /*border: 6px solid #FFF;*/
+      }
+      .Caption_Content {
+      color: #FFF;
+      padding: 5px 10px;
+      }
+      .main {
+      padding: 20px 20px 20px 20px;
+      margin: 40px 0 0 0;
+      }
+      .overlay {
+      background-color: #191919;
+      bottom: 0;
+      left: 0;
+      overflow: hidden;
+      position: fixed;
+      right: 0;
+      top: 0;
+      z-index: 1099;
+      }
+      #photo-details {
+      display: none;
+      }
+      #photo-details > .row {
+      height: 100%;
+      }
+      #photo-details .photo {
+      background: #000;
+      height: 100%;
+      padding: 10px;
+      }
+      #photo-details .photo {
+      color: #b1b1b1;
+      font-size: 20px;
+      }
+      #photo-details .photo .glyphicon:hover {
+      color: #FFF;
+      }
+      #photo-details .details {
+      background: #FFF;
+      height: 100%;
+      }
+      .img-responsive {
+      max-height: 100%;
+      }
+      .photo-wrapper {
+      height: 100%;
+      }
+      .photo-wrapper img {
+      vertical-align: middle;
+      }
+  body
+    #wrapper
+      #header
+        nav.navbar.navbar-default.navbar-fixed-top(role='navigation')
+          .navbar-header
+            button.navbar-toggle(type='button', data-toggle='collapse', data-target='#bs-example-navbar-collapse-1')
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+            a.navbar-brand(href='/')
+              strong #{title}
+          #bs-example-navbar-collapse-1.collapse.navbar-collapse
+            ul.nav.navbar-nav.navbar-right
+              li
+                a(href='/')
+                  span.glyphicon.glyphicon-map-marker
+                  |  Location
+              | &#x9;                    
+              li.active
+                a(href='/photos')
+                  span.glyphicon.glyphicon-camera
+                  |  Photos
+              li
+      .main(role='main')
+        .Collage
+      #photo-details
+        .row
+          .photo.col-xs-12.col-md-9
+            .row
+              .col-md-2.col-md-offset-10
+                span.glyphicon.glyphicon-remove.pull-right
+            .row
+              .col-md-12
+                .photo-wrapper
+            .row
+              .col-md-12
+          .details.col-xs-6.col-md-3
+            | Photo Details
+    // Javascript
+    script(type='text/javascript', src='/javascripts/jquery-1.11.0.min.js')
+    script(src='//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js')
+    script(type='text/javascript', src='/javascripts/collagePlus/jquery.collagePlus.min.js')
+    script(type='text/javascript', src='/javascripts/collagePlus/jquery.removeWhitespace.min.js')
+    script(type='text/javascript', src='/javascripts/collagePlus/jquery.collageCaption.min.js')
+    script(type='text/javascript', src='/javascripts/fancybox/jquery.fancybox.pack.js')
+    script(type='text/javascript', src='/javascripts/fancybox/helpers/jquery.fancybox-thumbs.js')
+    script(type='text/javascript', src='/javascripts/fancybox/helpers/jquery.fancybox-buttons.js')
+    script.
+      $(function() {
+      $(".fancybox-button").fancybox({
+      prevEffect		: 'none',
+      nextEffect		: 'none',
+      closeBtn		: false,
+      helpers		: {
+      title	: { type : 'inside' },
+      buttons	: {}
+      }
+      });
+      /*
+      //Close photo details
+      $('#photo-details .glyphicon-remove').on('click', function(){
+      $('#photo-details .photo-wrapper img').remove();
+      $('#photo-details').removeClass('overlay').hide();
+      });
+      //Attach delegate event when img is clicked. Bubbles up 1 level. Only 1 handler needed.
+      $( ".Collage" ).on( "click", ".Image-wrapper", function(event) {
+      var photo_large_url = $(this).attr('data-large-url');
+      var photo_caption = $(this).attr('data-caption');
+      $('#photo-details .photo-wrapper').append(
+      $('<img>', {
+      'id': photo_caption,
+      'src': photo_large_url
+      }).addClass('img-responsive center-block')
+      );
+      $('#photo-details').addClass('overlay').show();
+      });
+      */
+      //If window is resized
+      var resizeTimer = null;
+      $(window).bind('resize', function() {
+      // hide all the images until we resize them
+      // set the element you are scaling i.e. the first child nodes of ```.Collage``` to opacity 0
+      $('.Collage .Image-wrapper').css("opacity", 0);
+      // set a timer to re-apply the plugin.
+      //This needs to be done since resize gets called multiple times during dragging of window
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(applyCollagePlus, 500);
+      });
+      loadPhotos('.Collage', applyCollagePlus);
+      });
+      var applyCollagePlus = function(){
+      $('.Collage').removeWhitespace().collagePlus(
+      {
+      'fadeSpeed'     : 500,
+      'targetHeight'  : 300,
+      'effect'        : 'default',
+      'direction'     : 'vertical',
+      'allowPartialLastRow' : true
+      }
+      );
+      $('.Collage').collageCaption();
+      }
+      var buildPhotoDetails = function(){
+      };
+      //Add photo to  html
+      var addPhoto = function(element, title, imgSource, imgSourceLarge, height, width) {
+      $(element).append(
+      $('<a>', {
+      'class' : 'Image-wrapper',
+      'data-caption' : title,
+      'href' : imgSourceLarge,
+      'class' : 'fancybox-button',
+      'rel' : 'fancybox-button',
+      'title' : title
+      }).append(
+      $('<img>', {
+      'id': title,
+      'src': imgSource,
+      'rel': 'gallery',
+      'class': 'fancybox'
+      })
+      .attr('height', height)
+      .attr('width', width)
+      )
+      );
+      };
+      var loadPhotos = function(element, formatPhotosCallback, alwaysCallback) {
+      //AJAX to grab photo urls
+      $.get('/api/get/photos')
+      .done(function(data) {
+      $.each(data.photoset.photo, function(index, item) {
+      var lat = item.latitude;
+      var lng = item.longitude;
+      var photo_thumbnail_url = item.url_t;
+      var photo_small_url = item.url_n;
+      //var photo_medium_url = item.url_z;
+      var photo_large_url = item.url_c;
+      var height = item.height_n;
+      var width = item.width_n;
+      var title = item.title;
+      //Add photo to thumbnails list
+      addPhoto(element, title, photo_small_url, photo_large_url, height, width);
+      });
+      //Style the photos
+      if (formatPhotosCallback && typeof(formatPhotosCallback) === "function") {
+      formatPhotosCallback();
+      }
+      })
+      .always(function() {
+      //Callback
+      if (alwaysCallback && typeof(alwaysCallback) === "function") {
+      alwaysCallback();
+      }
+      });
+      };
