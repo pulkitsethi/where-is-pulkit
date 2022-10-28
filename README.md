@@ -1,4 +1,4 @@
-![Main Build Status](https://github.com/pulktisethi/where-is-pulkit/actions/workflows/node-build.yml/badge.svg?branch=main)
+[![Node.js CI](https://github.com/pulkitsethi/where-is-pulkit/actions/workflows/node-build.yml/badge.svg?branch=main)](https://github.com/pulkitsethi/where-is-pulkit/actions/workflows/node-build.yml)
 
 # Where Is Pulkit
 
