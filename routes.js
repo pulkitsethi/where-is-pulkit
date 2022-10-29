@@ -8,23 +8,29 @@ const got = import('got');
 //Setup Application Level Cache
 const myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
+const convertLocationToGeoJsonLineString = (locations) => {
+    //Converting locations into geoJSON multistring
+    let coordinates = [];
+
+    for(let key in locations){
+        coordinates.push([locations[key].longitude, locations[key].latitude]);
+    }
+
+    const geoJSONLocations =  {
+        "type": "LineString",
+        "coordinates": coordinates
+    }
+
+    return geoJSONLocations;
+}
+
 const cacheLocations = (ttl, callback) => {
     Location.find().sort({timestamp: 1}).exec(function(err, locations){
         if(err){
             console.log("Error getting LOCATIONS");
         }
 
-        //Converting locations into geoJSON multistring
-        let coordinates = [];
-
-        for(let key in locations){
-            coordinates.push([locations[key].longitude, locations[key].latitude]);
-        }
-
-        const geoJSONLocations =  {
-            "type": "LineString",
-            "coordinates": coordinates
-        }
+        const geoJSONLocations = convertLocationToGeoJsonLineString(locations);
 
         //Cache location
         let success = myCache.set("locations", geoJSONLocations, ttl);
@@ -182,7 +188,18 @@ module.exports = (app, io) => {
     
     //------------API------------
     app.get('/api/get/location', (req, res) => {
-        
+        // Hard code Austin for now
+        const points = [
+            [-77.0369, 38.9072],	// DC
+            [-84.3880, 33.7490],	// ATL
+            [-90.0715, 29.9511],	// NOLA
+            [-95.3698, 29.7604],	// Houston
+            [-97.7431, 30.2672]		// Austin
+        ];
+
+        res.jsonp(points);
+
+        /*
         //Creating response callback function
         let response = (err, locations) => {
             if(err) {
@@ -206,6 +223,7 @@ module.exports = (app, io) => {
                 res.jsonp({locations: value.locations});
             }
         });
+        */
     });
     
     app.get('/api/get/checkins', (req, res) => {

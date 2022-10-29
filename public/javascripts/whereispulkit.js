@@ -41,28 +41,21 @@
 
 			//Setup map
 			mapboxgl.accessToken = 'pk.eyJ1IjoicHVsa2l0c2V0aGkiLCJhIjoiY3BjU3ltbyJ9.acF-afjaugysxggqIfBR7w';
-			const map = new mapboxgl.Map({
+			map = new mapboxgl.Map({
 				container: 'map',
 				style: 'mapbox://styles/mapbox/streets-v11',
 				center: [options.map.center.lng, options.map.center.lat],
 				zoom: options.map.zoom,
-				projection: 'globe' // display the map as a 3D globe
 			});
 
 			// Add zoom and rotation controls to the map.
 			map.addControl(new mapboxgl.NavigationControl());
 
-			//MAP Event - load
 			map.on('style.load', () => {
-				//Log
-				//console.log('Map loaded');
-				map.setFog({}); // Set the default atmosphere style
-
 				//Updating data on map
 				updateMap();
 			});
 
-			//MAP Event - zoom end
 			map.on('zoomend dragend', (e) => {
 				let zoom = map.getZoom();
 				let latlng = map.getCenter();
@@ -93,7 +86,7 @@
 
 		};
 
-		const updateMap = (callback) => {
+		const updateMap = () => {
 			//Variables
 			let ajaxNotification = {};	//Notification object
 
@@ -113,9 +106,9 @@
 
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
 
-					drawGeoData(data);
-					drawFoursquare();
-					drawFlickr();
+					drawTravelPath(data);
+					//drawFoursquare();
+					//drawFlickr();
 				},
 				complete: () => {
 					ajaxNotification.close();
@@ -125,9 +118,6 @@
 				}
 			});
 
-			if (callback && typeof(callback) === "function") { 
-				callback();
-			}
 		};
 
 		/* Generates Notifcation
@@ -154,87 +144,72 @@
 		};
 
 		//Displays data on map
-		const drawGeoData = (data, callback) => {
-			//Debugging
-			//console.log('Draw Geo Data');
+		const drawTravelPath = (points) => {
 
-			let pointList = [];
-			const coords = data.locations.coordinates;
-			
-			//Converting data into LatLng objects
-			for(let i = 0; i < coords.length; i++){
-				pointList.push(new L.LatLng(coords[i][1], coords[i][0]));
-
-				//Debugging
-				//L.circleMarker(new L.LatLng(coords[i][1], coords[i][0])).addTo(map);
-			}
-
-			//DRAWING GEOMETRY
-			//Creating path polyline
-			path = new L.Polyline(pointList, {
-				color:  '#FF5300'
-				,weight: 2.6
-				,opacity: 0.9
-				,smoothFactor: 1
-				,dashArray: [10,5]
+			map.addSource('route', {
+				'type': 'geojson',
+				'data': {
+					'type': 'Feature',
+					'properties': {},
+					'geometry': {
+						'type': 'LineString',
+						'coordinates': points
+					}
+				}
 			});
 
-			//Add polyline to map
-			path.addTo(map);
-
-			//Creating position marker at last coordinate
-			position = pointList[pointList.length-1];
-
-			var positionIcon = L.icon({
-			    iconUrl: '/images/driving-car-icon-2.png'
-			    , iconSize: [68, 78]
-			    , iconAnchor:   [35, 64]
+			map.addLayer({
+				'id': 'route',
+				'type': 'line',
+				'source': 'route',
+				'layout': {
+					'line-join': 'round',
+					'line-cap': 'round'
+				},
+				'paint': {
+					'line-color': '#FF5300',
+					'line-width': 2.6,
+					'line-dasharray': [10,5]
+				}
 			});
 
-			positionMarker = L.marker(position, {
-				icon: positionIcon
-				, bounceOnAdd: true
-				, zIndexOffset: 249
-			});
-
-			positionMarker.addTo(map);
-
-			//UPDATING TEXT
-			//Saving position in global variable for other functions (updating city)
-			current_position = { 
-				lat: position.lat,
-		    	lng: position.lng
-		    }
-
-		    updateCity();
-
-			//Updating Map view
-			if(!hash_options){
-		    	map.fitBounds(path.getBounds());//.setMaxBounds(map.getBounds());
-			}
-
-			//Overiding original zoom control.  Zoom control will zoom in twice
-		    const zoomControl = new L.Control.Zoom();
-
-		    zoomControl._zoomIn = function (e) {
-				this._map.zoomIn(e.shiftKey ? 3 : 2);
-			};
-
-			zoomControl._zoomOut = function (e) {
-				this._map.zoomOut(e.shiftKey ? 3 : 2);
-			};
-
-			map.addControl(zoomControl);
-
-			//Adding Max Zoom Controls
-			map.addControl(new MaxZoomControl());
-
-		    //MaxZoomControl.addTo(map);
-
-		    //Callback
-			if (callback && typeof(callback) === "function") { 
-				callback();
-			}
+			map.loadImage(
+				'/images/driving-car-icon-2.png',
+				(error, image) => {
+					if (error) throw error;
+	
+					// Add the image to the map style.
+					map.addImage('driving-car-head', image);
+	
+					// Add a data source containing one point feature.
+					map.addSource('point', {
+						'type': 'geojson',
+						'data': {
+							'type': 'FeatureCollection',
+							'features': [
+								{
+									'type': 'Feature',
+									'geometry': {
+										'type': 'Point',
+										'coordinates': points[points.length-1]
+									}
+								}
+							]
+						}
+					});
+	
+					// Add a layer to use the image to represent the data.
+					map.addLayer({
+						'id': 'points',
+						'type': 'symbol',
+						'source': 'point', // reference the data source
+						'layout': {
+							'icon-image': 'driving-car-head', // reference the image
+							'icon-size': 0.75
+						}
+					});
+				}
+			);
 
 		};
 
