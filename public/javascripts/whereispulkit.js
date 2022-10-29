@@ -1,18 +1,16 @@
-	
 	var WhereIsPulkit = (function(){
 		//Variables
-		var options = {};			//Configurable options
-		var hash_options = null;	//Options stored in the url hash
-		var map = {};				//Handle to map
-		var current_position = {};	//Keeping track of position
-		var previous_city = null;	//Keeping track of last known position
-		var path = null;			//Polyline of path
-		var positionMarker = null;	//Marker for current position
+		let options = {};			//Configurable options
+		let hash_options = null;	//Options stored in the url hash
+		let map = {};				//Handle to map
+		let current_position = {};	//Keeping track of position
+		let previous_city = null;	//Keeping track of last known position
+		let path = null;			//Polyline of path
+		let positionMarker = null;	//Marker for current position
 
-		var initialize = function(options) {
+		const initialize = (options) => {
 			//console.log('Initialize');
-            
-			if(location.hash){
+			if (location.hash) {
 				var url_opts = location.hash.slice(1).split(',');
 
 				hash_options = {
@@ -23,7 +21,7 @@
 							lng: url_opts[2]
 						}
 					}
-				}
+				};
 			}
 
 			//Extend options
@@ -31,9 +29,9 @@
 				map: {
 					id: 'pulkitsethi.map-6rv4q6kw',
 					zoom: 4,
-					center: { 
+					center: {
 						lat: 38.60313492038697,
-						lng: -97.94665625 
+						lng: -97.94665625
 					},
 					minZoom: 4,
 					maxZoom: 16,
@@ -41,81 +39,76 @@
 				}
 			}, hash_options, options);
 
-			var map = L.map('map').setView([38.60313492038697, -97.94665625], 4);
-
 			//Setup map
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				minZoom: options.map.minZoom, 
-				maxZoom: options.map.maxZoom,
+			mapboxgl.accessToken = 'pk.eyJ1IjoicHVsa2l0c2V0aGkiLCJhIjoiY3BjU3ltbyJ9.acF-afjaugysxggqIfBR7w';
+			const map = new mapboxgl.Map({
+				container: 'map',
+				style: 'mapbox://styles/mapbox/streets-v11',
+				center: [options.map.center.lng, options.map.center.lat],
 				zoom: options.map.zoom,
-				center: [options.map.center.lat, options.map.center.lng],
-				zoomControl: options.map.zoomControl
-			}).addTo(map);
-			
+				projection: 'globe' // display the map as a 3D globe
+			});
+
+			// Add zoom and rotation controls to the map.
+			map.addControl(new mapboxgl.NavigationControl());
+
 			//MAP Event - load
-			map.on('load', function(){
+			map.on('style.load', () => {
 				//Log
 				//console.log('Map loaded');
-
-				//map.touchZoom = false;
-				//map.scrollWheelZoom = false;
+				map.setFog({}); // Set the default atmosphere style
 
 				//Updating data on map
 				updateMap();
 			});
 
 			//MAP Event - zoom end
-			map.on('zoomend dragend', function(e) {
-				var zoom = map.getZoom();
-				var latlng = map.getCenter();
+			map.on('zoomend dragend', (e) => {
+				let zoom = map.getZoom();
+				let latlng = map.getCenter();
 
 				//console.log('Zoomend: ' + zoom);
-
 				//Update URL
-		    	//location.hash = 'z=' + zoom + '&' + 'latlng=' + latlng.lat + ',' + latlng.lng;
-		    	location.hash = zoom + ',' +  latlng.lat + ',' + latlng.lng;
+				//location.hash = 'z=' + zoom + '&' + 'latlng=' + latlng.lat + ',' + latlng.lng;
+				location.hash = zoom + ',' + latlng.lat + ',' + latlng.lng;
 			});
 
 			//Socket
-			var socket = io.connect(window.location.protocol + "//" + window.location.host);
-			  
+			let socket = io.connect(window.location.protocol + "//" + window.location.host);
+
 			//SOCKET.IO - Listening to position updates
-			socket.on('position-update', function (data) {
+			socket.on('position-update', (data) => {
 				//console.log(data);
 				//console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
+				//Cacheing last known position locally to be used by other functions
+				current_position.lat = data.lat;
+				current_position.long = data.long;
 
-			    //Cacheing last known position locally to be used by other functions
-			    current_position.lat = data.lat;
-			    current_position.long = data.long;
+				//Updating marker
+				updatePosition(data.lat, data.long);
 
-			    //Updating marker
-			    updatePosition(data.lat, data.long);
-
-			    //Update City
-			    updateCity(data.lat, data.long);
+				//Update City
+				updateCity(data.lat, data.long);
 			});
-
-			//Setting initial center
-			//map.setView([options.map.center.lat, options.map.center.lng], options.map.zoom);
 
 		};
 
-		var updateMap = function(callback){
+		const updateMap = (callback) => {
 			//Variables
-			var ajaxNotification = {};	//Notification object
+			let ajaxNotification = {};	//Notification object
 
 			//Get geo data and load into map
-            var url = '/api/get/location';
+            const url = '/api/get/location';
             
 			//Get location data
 			$.ajax({
 				type: "GET",
 				url: url,
 				dataType: 'json',
-				beforeSend: function(){
+				beforeSend: () => {
 					ajaxNotification = generateNotification('information', 'center', 'Locating Pulkit...');
 				},
-				success: function(data){
+				success: (data) => {
 					ajaxNotification.close();
 
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
@@ -124,15 +117,13 @@
 					drawFoursquare();
 					drawFlickr();
 				},
-				complete: function (){
+				complete: () => {
 					ajaxNotification.close();
 				},
-				error: function (request, status, error){
+				error: (request, status, error) => {
 					generateNotification('error', 'center', 'Can not find Pulkit :( Please try again shortly.');
 				}
 			});
-
-
 
 			if (callback && typeof(callback) === "function") { 
 				callback();
@@ -145,10 +136,9 @@
 		*	text: Text to display
 		*	timeout: Time that passes before notification goes away (in milliseconds)
 		*/
-		var generateNotification = function(type, layout, text, timeout) {
+		const generateNotification = (type, layout, text, timeout) => {
 		   		
-		   		
-			   var n = noty({
+			   const n = noty({
 			   		text: text,
 			   		type: type,
 			        dismissQueue: true,
@@ -157,7 +147,6 @@
 			   		timeout: timeout
 			   });
 				
-
 			   //Debugging
 			   //console.log('html: '+n.options.id);
 
@@ -165,15 +154,15 @@
 		};
 
 		//Displays data on map
-		var drawGeoData = function(data, callback){
+		const drawGeoData = (data, callback) => {
 			//Debugging
 			//console.log('Draw Geo Data');
 
-			var pointList = [];
-			var coords = data.locations.coordinates;
+			let pointList = [];
+			const coords = data.locations.coordinates;
 			
 			//Converting data into LatLng objects
-			for(var i = 0; i < coords.length; i++){
+			for(let i = 0; i < coords.length; i++){
 				pointList.push(new L.LatLng(coords[i][1], coords[i][0]));
 
 				//Debugging
@@ -225,7 +214,7 @@
 			}
 
 			//Overiding original zoom control.  Zoom control will zoom in twice
-		    var zoomControl = new L.Control.Zoom();
+		    const zoomControl = new L.Control.Zoom();
 
 		    zoomControl._zoomIn = function (e) {
 				this._map.zoomIn(e.shiftKey ? 3 : 2);
@@ -249,24 +238,23 @@
 
 		};
 
-		var updatePosition = function(lat, long) {
-			var position = new L.LatLng(lat, long);
+		const updatePosition = (lat, long) => {
+			const position = new L.LatLng(lat, long);
 
 		    //Add new position
 		    path.addLatLng(position);
 
 			positionMarker.setLatLng(position);
-			//circleMarker.setLatLng(position);
 		}		
 
-		var updateCity = function(lat, lng, callback){
+		const updateCity = (lat, lng, callback) => {
 			//Debugging
 			//console.log('Locating city...');
 
 			//Variables
-			var current_lat = null;			//Local scoped lat
-			var current_lng = null;			//Local scoped long
-			var city_geocode_url = null;	//URL for city geocode service
+			let current_lat = null;			//Local scoped lat
+			let current_lng = null;			//Local scoped long
+			let city_geocode_url = null;	//URL for city geocode service
 
 			//Checks to see if lat and lng where provided, and if not defaults to global lat,lng
 			if(lat && lng){
@@ -284,16 +272,16 @@
 			$.get(
 			    city_geocode_url,
 			    function(data) {
-					var city = null;	//City returned from API call
+					let city = null;	//City returned from API call
 
-			       $.each(data.results[0], function (index, item){
+			    	$.each(data.results[0], function (index, item){
 			       		if(item.type == 'CDP' || item.type == 'city'){
 			       			//Debugging
 			       			//console.log('City: ' + item.name);
 
 			       			city = item.name;
 			       		}
-			       });
+			       	});
                     
                     //Show status bar if not visible
                     var statusBar = $('#status-bar');
@@ -303,15 +291,15 @@
                     }
                     
 
-                   //Update page if city has changed
-                   if(city == null){
+                   	//Update page if city has changed
+                   	if(city == null){
                         $('#current-city').hide().text('Unknown').fadeIn(1500);
-                   }
-			       else if(city != previous_city){
+                   	}
+			       	else if(city != previous_city){
 				       $('#current-city').hide().text(city).fadeIn(1500);
                        
                        previous_city = city;
-			       }   
+			       	}   
 			    }
 			);
 
@@ -321,36 +309,36 @@
 			}
 		};
 
-		var drawFoursquare = function() {
-            var foursquare_checkin_url = '/api/get/checkins';
+		const drawFoursquare = () => {
+            const foursquare_checkin_url = '/api/get/checkins';
 
 			$.get(
 				foursquare_checkin_url,
-				function(data){
+				(data) => {
 
-					$.each(data.response.checkins.items, function(index, item){
-						var lat = item.venue.location.lat;
-						var lng = item.venue.location.lng;
+					$.each(data.response.checkins.items, (index, item) => {
+						const lat = item.venue.location.lat;
+						const lng = item.venue.location.lng;
                         
-                        var icon = item.venue.categories[0].icon;
-						var iconUrl = icon.prefix + 'bg_32' + icon.suffix;
+                        const icon = item.venue.categories[0].icon;
+						const iconUrl = icon.prefix + 'bg_32' + icon.suffix;
                         
-                        var venueUrl = 'https://foursquare.com/v/' + item.venue.id;
+                        const venueUrl = 'https://foursquare.com/v/' + item.venue.id;
 
-						var position = new L.LatLng(lat, lng);
+						const position = new L.LatLng(lat, lng);
 
-						var foursquareIcon = L.AwesomeMarkers.icon({
+						const foursquareIcon = L.AwesomeMarkers.icon({
 							icon: 'foursquare', 
 							color: 'blue'
 						});
 
-						var foursquareMarker = L.marker(position, {
+						const foursquareMarker = L.marker(position, {
 							icon: foursquareIcon
 							, riseOnHover: true
 							, bounceOnAdd: true
 						});
 						
-						var popupHtml = "<div class='category'> <img src='" + iconUrl + "'/> </div>";
+						let popupHtml = "<div class='category'> <img src='" + iconUrl + "'/> </div>";
 						popupHtml += "<a target='_blank' href='" + venueUrl +"'><div class='venueName'>" + item.venue.name + "</div></a>";
 
 						foursquareMarker
@@ -367,12 +355,12 @@
 			);
 		};
 
-		var drawFlickr = function(){
+		const drawFlickr = () => {
 			var flickr_photos_url = '/api/get/photos';
 
 			$.get(
 				flickr_photos_url,
-				function(data){
+				(data) => {
 					
 					$.each(data.photoset.photo, function(index, item){
 						var lat = item.latitude;
@@ -445,12 +433,12 @@
 		};
 
 		//Adding custom zoom control
-		var MaxZoomControl = L.Control.extend({
+		const MaxZoomControl = L.Control.extend({
 		    options: {
 		        position: 'topleft'
 		    },
 
-		    onAdd: function (map) {
+		    onAdd: (map) => {
 		    	//console.log('Max Zoom Control onAdd')
 		        // create the control container with a particular class name
 		        var maxZoomName = 'whereispulkit-control-max-zoom', 
@@ -465,11 +453,11 @@
 		        return container;
 		    },
 
-		    onRemove: function (map) {
+		    onRemove: (map) => {
 				map.off('zoomend zoomlevelschange', this._updateDisabled, this);
 			},
 
-		    _maxZoomIn: function(e){
+		    _maxZoomIn: (e) => {
 		    	var maxZoom = map.getMaxZoom();
 				var lat = current_position.lat;
 				var lng = current_position.lng;
@@ -477,7 +465,7 @@
 				map.setView([lat, lng], maxZoom);
 		    },
 
-		    _maxZoomOut: function(e){
+		    _maxZoomOut: (e) => {
 		    	var maxZoom = map.getMinZoom();
 				var lat = current_position.lat;
 				var lng = current_position.lng;
@@ -485,7 +473,7 @@
 				map.setView([lat, lng], maxZoom);
 		    },
 
-			_createButton: function (html, title, className, container, fn, context) {
+			_createButton: (html, title, className, container, fn, context) => {
 				var link = L.DomUtil.create('a', className, container);
 				link.innerHTML = html;
 				link.href = '#';
@@ -503,8 +491,8 @@
 				return link;
 			},
 
-			_updateDisabled: function () {
-				var map = this._map,
+			_updateDisabled: () => {
+				const map = this._map,
 					className = 'leaflet-disabled';
 
 				L.DomUtil.removeClass(this._maxZoomInButton, className);
@@ -518,7 +506,7 @@
 				}
 			}
 		});
-
+ 
 		return {
 			init: initialize
 		};
