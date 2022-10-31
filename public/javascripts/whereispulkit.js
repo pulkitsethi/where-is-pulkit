@@ -102,8 +102,6 @@
 					ajaxNotification = generateNotification('information', 'center', 'Locating Pulkit...');
 				},
 				success: (data) => {
-					ajaxNotification.close();
-
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
 
 					drawTravelPath(data);
@@ -111,7 +109,7 @@
 					//drawFlickr();
 				},
 				complete: () => {
-					ajaxNotification.close();
+					
 				},
 				error: (request, status, error) => {
 					generateNotification('error', 'center', 'Can not find Pulkit :( Please try again shortly.');
@@ -127,20 +125,8 @@
 		*	timeout: Time that passes before notification goes away (in milliseconds)
 		*/
 		const generateNotification = (type, layout, text, timeout) => {
-		   		
-			   const n = noty({
-			   		text: text,
-			   		type: type,
-			        dismissQueue: true,
-			   		layout: layout,
-			   		theme: 'defaultTheme',
-			   		timeout: timeout
-			   });
-				
-			   //Debugging
-			   //console.log('html: '+n.options.id);
-
-			   return n;
+			   let notification;
+			   return notification;
 		};
 
 		//Displays data on map
