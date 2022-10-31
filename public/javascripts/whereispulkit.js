@@ -102,8 +102,6 @@
 					ajaxNotification = generateNotification('information', 'center', 'Locating Pulkit...');
 				},
 				success: (data) => {
-					ajaxNotification.close();
-
 					ajaxNotification = generateNotification('success', 'center', 'Pulkit Found!!', '3000');
 
 					drawTravelPath(data);
@@ -111,7 +109,7 @@
 					//drawFlickr();
 				},
 				complete: () => {
-					ajaxNotification.close();
+					
 				},
 				error: (request, status, error) => {
 					generateNotification('error', 'center', 'Can not find Pulkit :( Please try again shortly.');
