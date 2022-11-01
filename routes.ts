@@ -8,7 +8,7 @@ const got = import('got');
 //Setup Application Level Cache
 const myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
 
-const convertLocationToGeoJsonLineString = (locations) => {
+const convertLocationToGeoJsonLineString = (locations: any[]) => {
     //Converting locations into geoJSON multistring
     let coordinates = [];
 
@@ -24,8 +24,8 @@ const convertLocationToGeoJsonLineString = (locations) => {
     return geoJSONLocations;
 }
 
-const cacheLocations = (ttl, callback) => {
-    Location.find().sort({timestamp: 1}).exec(function(err, locations){
+const cacheLocations = (ttl: number, callback?: (err: any, geoJson: any) => void) => {
+    Location.find().sort({timestamp: 1}).exec(function(err: any, locations: any[]){
         if(err){
             console.log("Error getting LOCATIONS");
         }
@@ -39,16 +39,14 @@ const cacheLocations = (ttl, callback) => {
             console.log("CACHING: Locations");
         }
 
-        //Callback
-        if (callback && typeof(callback) === "function") {
-            // execute the callback, passing parameters as necessary
+        if (callback) {
             callback(err, geoJSONLocations);
         }
 
     });
 }
 
-const cacheCheckins = (ttl, limit, callback) => {
+const cacheCheckins = (ttl: number, limit?: number, callback?: () => void) => {
    //Variables
     let localLimit = 250;
     const afterTimestamp = 1370034000;  //Epoch Seconds
@@ -95,7 +93,7 @@ const cacheCheckins = (ttl, limit, callback) => {
       });
 }
 
-const cachePhotos = (ttl, callback) => {
+const cachePhotos = (ttl: number, callback?: () => void) => {
      //Variables
     const flickr_api_url = 'https://secure.flickr.com/services/rest';
     const method = 'flickr.photosets.getPhotos';
@@ -132,7 +130,7 @@ const cachePhotos = (ttl, callback) => {
         });
 }
 
-myCache.on( "expired", (key, value) => {
+myCache.on( "expired", (key: string, value: any) => {
     console.log('EXPIRED - CHACHE: ' + key);
     
     if(key === 'locations'){

@@ -66,24 +66,6 @@
 				location.hash = zoom + ',' + latlng.lat + ',' + latlng.lng;
 			});
 
-			//Socket
-			let socket = io.connect(window.location.protocol + "//" + window.location.host);
-
-			//SOCKET.IO - Listening to position updates
-			socket.on('position-update', (data) => {
-				//console.log(data);
-				//console.log('RECEIVED NEW POSITION: ' + data.lat + ', ' + data.long);
-				//Cacheing last known position locally to be used by other functions
-				current_position.lat = data.lat;
-				current_position.long = data.long;
-
-				//Updating marker
-				updatePosition(data.lat, data.long);
-
-				//Update City
-				updateCity(data.lat, data.long);
-			});
-
 		};
 
 		const updateMap = () => {
